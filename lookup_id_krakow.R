@@ -1,6 +1,13 @@
 
 
-df <- read.csv("C:/code/projects/mi/analyses/aim1/kra_struct_connectome_tractography/krakow_id_correspondance.csv")
+df <- read.csv("krakow_id_correspondance.csv")
+
+#freesurfer folder
+free_surfer <- "//hyades00.pet.auh.dk/projects/MINDLAB2016_MR-SensCogFromNeural/scratch/timo/krakow_rsfmri_raw/freesurfer"
+
+sub_names <- list.dirs(free_surfer, full.names = FALSE, recursive = FALSE)
+cleaned_sub_names <- gsub("^sub-", "", sub_names[grep("^sub-", sub_names)])
+# these are the subs we have freesurfer on
 
 
 # Remove the first line
@@ -17,6 +24,9 @@ df$krakow_id <- substr(df$krakow_id, 2, nchar(df$krakow_id))
 # Display the cleaned data
 df <- subset(df,df$Comments != "pilot",select=c("storm_db_id","krakow_id"))
 
-write.csv(df,"C:/code/projects/mi/analyses/aim1/kra_struct_connectome_tractography/krakow_id_correspondance_clean.csv")
+df <- subset(df,df$krakow_id %in% cleaned_sub_names)
+
+
+write.csv(df,"krakow_id_correspondance_clean.csv")
 
 

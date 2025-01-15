@@ -3,17 +3,23 @@
 # import
 import subprocess, os
 from stormdb.access import Query
+import pandas as pd
+import numpy as np
+
+import mrtrix3
 
 # define subjects and root
+# q = Query('2022_MR-SensCogGlobal')
+# subjects_XXX = q.get_subjects()
+# all_subjects = [subject.split('_')[0] for subject in subjects_XXX]
 
-q = Query('2022_MR-SensCogGlobal')
-subjects_XXX = q.get_subjects()
-all_subjects = [subject.split('_')[0] for subject in subjects_XXX]
+# subjects we have freesurfer on
+all_subjects = np.array(pd.read_csv("krakow_id_correspondance_clean.csv", dtype=str)["storm_db_id"])
 
 # Define the root directory and subject IDs
 root_dir = "/projects/2022_MR-SensCogGlobal/scratch"
 subjects = all_subjects
-subjects = ["0001"]  # Add all your subject IDs here
+subjects = ["0002"]  # Add all your subject IDs here
 
 
 # Define the configuration for which steps to run (1 to run, 0 to skip)

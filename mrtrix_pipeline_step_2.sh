@@ -1,11 +1,23 @@
 #!/bin/bash
 
+# NeurArchCon Diffusion Script
 
-SUBJECT=$1  # 0001 for example
+# stand in the folder
+# cd /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra
+# you might need to run:
+# chmod +x mrtrix_pipeline_step_2.sh
+
+# and for the freesurfer
+# chmod -R u+r /projects/MINDLAB2016_MR-SensCogFromNeural/scratch/timo/krakow_rsfmri_raw/freesurfer/
+
+# ./mrtrix_pipeline_step_2.sh 0002 /projects/2022_MR-SensCogGlobal/scratch
+
+
+SUBJECT=$1  # 0002 for example
 root_dir=$2  # /projects/2022_MR-SensCogGlobal/scratch
 
 
-SCRIPT_DIR="/projects/MINDLAB2016_MR-SensCogFromNeural/scratch/timo/mi/analyses/aim1/kra_struct_connectome_tractography"
+SCRIPT_DIR="/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra"
 
 csv_file="${SCRIPT_DIR}/krakow_id_correspondance_clean.csv"
 # Lookup FREESURFER_SUBJECT

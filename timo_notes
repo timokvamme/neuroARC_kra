@@ -48,3 +48,20 @@ MRtrix 3.0.4                         mrinfo                          Dec 14 2022
 
 
 it complaied about imp
+
+some of those issues might be because i need to run with python=3.10
+
+# so i did: (and set it in pycharm, my IDE)
+
+conda create -n mrtrix python=3.10
+conda activate mrtrix
+conda install -c mrtrix3 mrtrix3
+conda activate mrtrix
+
+conda install -c conda-forge fsl
+# after this things started working better.
+
+i think i need to "conda activate mrtrix"
+conda activate mrtrix
+
+before each run?. or have it in the beginning of the script.

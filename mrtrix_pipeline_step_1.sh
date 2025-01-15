@@ -1,37 +1,71 @@
 #!/bin/bash
 
-# NeurArchCon Diffusion Script - note that this picks up from the CFIN pipeline
-
-SUBJECT=$1  # 0001 for example
-root_dir=$2  # /projects/2022_MR-SensCogGlobal/scratch
+# NeurArchCon Diffusion Script - Processes Freesurfer data for a given subject
+conda activate mrtrix
 
 # stand in the folder
-# cd /projects/MINDLAB2016_MR-SensCogFromNeural/scratch/timo/mi/analyses/aim1/kra_struct_connectome_tractography
+# cd /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra
 # you might need to run:
-# chmod +x mrtrix_pipeline_step_1.sh
+# chmod +x mrtrix_pipeline_step_1_test.sh
 
-# ./mrtrix_pipeline_step_1.sh 0001 /projects/2022_MR-SensCogGlobal/scratch
+# and for the freesurfer
+# chmod -R u+r /projects/MINDLAB2016_MR-SensCogFromNeural/scratch/timo/krakow_rsfmri_raw/freesurfer/
 
-SCRIPT_DIR="/projects/MINDLAB2016_MR-SensCogFromNeural/scratch/timo/mi/analyses/aim1/kra_struct_connectome_tractography"
+# ./mrtrix_pipeline_step_1_test.sh 0002 /projects/2022_MR-SensCogGlobal/scratch
 
+
+
+SUBJECT=$1  # e.g., 0002
+root_dir=$2  # e.g., /projects/2022_MR-SensCogGlobal/scratch
+
+# Ensure both arguments are provided
+if [[ -z $SUBJECT || -z $root_dir ]]; then
+  echo "Usage: $0 <SUBJECT> <root_dir>"
+  exit 1
+fi
+
+# Paths
+SCRIPT_DIR="/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra"
 csv_file="${SCRIPT_DIR}/krakow_id_correspondance_clean.csv"
+
 # Lookup FREESURFER_SUBJECT
 FREESURFER_SUBJECT=$(awk -F',' -v subject="$SUBJECT" '
 NR > 1 && $2 ~ subject {
     gsub(/"/, "", $3);
     print $3;
 }' "$csv_file")
-# Error handling
+
+# Remove any trailing carriage return characters
+FREESURFER_SUBJECT=$(echo "$FREESURFER_SUBJECT" | tr -d '\r')
+
+# Error handling if FREESURFER_SUBJECT is empty
 if [[ -z $FREESURFER_SUBJECT ]]; then
   echo "Error: Could not find FREESURFER_SUBJECT (krakow_id) for SUBJECT=$SUBJECT in $csv_file"
   exit 1
 fi
+
 echo "Processing SUBJECT=$SUBJECT with FREESURFER_SUBJECT=$FREESURFER_SUBJECT"
 
-FREESURFER_DIR=$root_dir/timo/krakow_rsfmri_raw/freesurfer/sub-${FREESURFER_SUBJECT}
+# Freesurfer paths
+export SUBJECTS_DIR="/projects/MINDLAB2016_MR-SensCogFromNeural/scratch/timo/krakow_rsfmri_raw/freesurfer"
+FREESURFER_DIR="${SUBJECTS_DIR}/sub-${FREESURFER_SUBJECT}"
+
+# Debugging output
+echo "DEBUG: SUBJECTS_DIR=$SUBJECTS_DIR"
+echo "DEBUG: FREESURFER_DIR=$FREESURFER_DIR"
+
+# Verify the Freesurfer directory exists
+if [[ ! -d $FREESURFER_DIR ]]; then
+  echo "Error: Freesurfer directory does not exist: $FREESURFER_DIR"
+  exit 1
+fi
+
+# List the contents of the Freesurfer directory
+echo "Listing contents of Freesurfer directory:"
+ls "$FREESURFER_DIR"
+
 
 MRTRIX3_DIR=$root_dir/results/mrtrix3
-
 OUTPUT_DIR=$MRTRIX3_DIR/sub-${SUBJECT}
 CFIN_DIR=${root_dir}
 MASK_DIR="${CFIN_DIR}/maskskurtosis2024/${SUBJECT}/*/MR/KURTOSIS/NATSPACE"
@@ -44,7 +78,7 @@ SCRATCH=$MRTRIX3_DIR/5tt
 
 mkdir -p ${OUTPUT_DIR}
 
-mrcat ${CFIN_DIR}/datakurtosis2024/${SUBJECT}/*/MR/KURTOSIS1_DIRS/NATSPACE/*nii ${OUTPUT_DIR}/temp.mif
+mrcat ${CFIN_DIR}/datakurtosis2024/${SUBJECT}/*/MR/KURTOSIS_DIRS/NATSPACE/*nii ${OUTPUT_DIR}/temp.mif
 
 mrconvert \
 	${OUTPUT_DIR}/temp.mif \
