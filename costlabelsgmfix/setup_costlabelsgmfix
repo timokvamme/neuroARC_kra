@@ -1,0 +1,5 @@
+#!/bin/bash
+
+MRTRIX_FOLDER=`dirname $(which mrinfo)`
+
+cp ./costlabelsgmfix ${MRTRIX_FOLDER}/costlabelsgmfix

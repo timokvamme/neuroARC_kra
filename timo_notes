@@ -1,0 +1,50 @@
+
+# Goal was to create structral connectomes / tractography on the krakow site
+# after the CFIN preprocessing pipeline had been run on CogSensGlobal 2022.
+# also the Freesurfer had been run on each subject
+
+# after instructions from Claude i downloaded this  https://github.com/MassimoLumaca/neuroARC/tree/main
+# it was copied to this folder in mi,  /analses/aim1/struct_connectome_tractography
+# I updated MRtrix 3 on my local account
+
+# with a terminal to hyades:
+
+cd /projects/2022_MR-SensCogGlobal/scripts
+
+conda install -c mrtrix3 mrtrix3
+
+# run:
+mrinfo
+
+# you should see:
+MRtrix 3.0.4                         mrinfo                          Dec 14 2022
+
+# made paths:
+\\hyades00.pet.auh.dk\projects\2022_MR-SensCogGlobal\scratch\results
+\\hyades00.pet.auh.dk\projects\2022_MR-SensCogGlobal\scratch\results\5tt
+\\hyades00.pet.auh.dk\projects\2022_MR-SensCogGlobal\scratch\results\mrtrix3_Destrieux
+\\hyades00.pet.auh.dk\projects\2022_MR-SensCogGlobal\scratch\results\mrtrix3
+\\hyades00.pet.auh.dk\projects\2022_MR-SensCogGlobal\scratch\results\mrtrix3\average_response
+
+
+# I found the corresponding krakow id that is the freesurfer id, and their stormd_id and saved it to a csv file and did
+# and did some cleaning on that, in the remade scripts i look this id up. for freesurfer sub folders.
+
+
+# i step up all the steps in the folder, for step 1,2,3,4,5.. 5 is tricky cuz of the diffrent atlases, desikan and desitrux.
+# i also am in doubt about T1, folder. ill have to get info from claude on that
+# and the LUT on step5.
+
+
+# but you can test step 0, to see that the freesurfer id works
+# also in step 1 for example:
+
+# stand in the folder, but running cd below:
+# cd /projects/MINDLAB2016_MR-SensCogFromNeural/scratch/timo/mi/analyses/aim1/kra_struct_connectome_tractography
+# you might need to run:
+# chmod +x mrtrix_pipeline_step_1.sh
+
+# ./mrtrix_pipeline_step_1.sh 0001 /projects/2022_MR-SensCogGlobal/scratch
+
+
+it complaied about imp
