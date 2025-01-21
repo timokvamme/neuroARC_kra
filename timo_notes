@@ -58,10 +58,36 @@ conda activate mrtrix
 conda install -c mrtrix3 mrtrix3
 conda activate mrtrix
 
-conda install -c conda-forge fsl
-# after this things started working better.
 
 i think i need to "conda activate mrtrix"
 conda activate mrtrix
 
-before each run?. or have it in the beginning of the script.
+before each run?. YES. i need to do it in the terminal. conda activate mrtrix every time.
+
+# need to install fsl.
+# https://fsl.fmrib.ox.ac.uk/fsl/docs/#/install/linux
+
+I downloaded the fslinstaller.py
+python fslinstaller.py
+
+# into dir "/users/timo/my_fsl"
+conda activate /users/timo/my_fsl
+
+
+#  so i can either have mrtrix3 but not together
+
+but if i instead just conda activate mrtrix  AND!:
+
+export FSLDIR=~/my_fsl
+export PATH=$FSLDIR/bin:$PATH
+export LD_LIBRARY_PATH=$FSLDIR/lib:$LD_LIBRARY_PATH
+export FSLOUTPUTTYPE=NIFTI_GZ
+source $FSLDIR/etc/fslconf/fsl.sh
+
+conda activate mrtrix
+
+
+
+
+
+

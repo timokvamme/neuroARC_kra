@@ -14,7 +14,7 @@ root_dir=$2  # e.g., /projects/2022_MR-SensCogGlobal/scratch
 # and for the freesurfer
 # chmod -R u+r /projects/MINDLAB2016_MR-SensCogFromNeural/scratch/timo/krakow_rsfmri_raw/freesurfer/
 
-# ./mrtrix_pipeline_step_1.sh 0002 /projects/2022_MR-SensCogGlobal/scratch
+# ./mrtrix_pipeline_step_1_test.sh 0002 /projects/2022_MR-SensCogGlobal/scratch
 
 # Ensure both arguments are provided
 if [[ -z $SUBJECT || -z $root_dir ]]; then
@@ -64,8 +64,8 @@ ls "$FREESURFER_DIR"
 
 
 
-MRTRIX3_DIR=$root_dir/results/mrtrix3
 
+MRTRIX3_DIR=$root_dir/results/mrtrix3
 OUTPUT_DIR=$MRTRIX3_DIR/sub-${SUBJECT}
 CFIN_DIR=${root_dir}
 MASK_DIR="${CFIN_DIR}/maskskurtosis2024/${SUBJECT}/*/MR/KURTOSIS/NATSPACE"
@@ -76,18 +76,29 @@ SCRATCH=$MRTRIX3_DIR/5tt
 # Script for processing CFIN pipeline output with MRtrix3 for tractography
 
 
-mkdir -p ${OUTPUT_DIR}
+transformconvert ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_fsl_bbr.mat \
+	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0_brain.nii.gz \
+	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz \
+	flirt_import ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_mrtrix_bbr.txt
 
-mrcat ${CFIN_DIR}/datakurtosis2024/${SUBJECT}/*/MR/KURTOSIS_DIRS/NATSPACE/*nii ${OUTPUT_DIR}/temp.mif
+#old:  ${T1_DIR}/sub-${SUBJECT}_run-01_T1w.nii.gz \
+mrtransform ${T1_DIR}/T1.mgz \
+	-linear ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_mrtrix_bbr.txt \
+	-inverse ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_coreg.mif
 
-mrconvert \
-	${OUTPUT_DIR}/temp.mif \
-	-fslgrad \
-	${CFIN_DIR}/infokurtosis2024/${SUBJECT}/*/MR/KURTOSIS/diffusion.bvec \
-	${CFIN_DIR}/infokurtosis2024/${SUBJECT}/*/MR/KURTOSIS/diffusion.bval \
-	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_DWI.mif
+mrtransform ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt.mif \
+	-linear ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_mrtrix_bbr.txt \
+	-inverse ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt_coreg.mif
 
-rm ${OUTPUT_DIR}/temp.mif
+rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w*.nii.gz
 
-# Create 5tt image for ACT
-5ttgen hsvs ${FREESURFER_DIR} ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt.mif -scratch ${SCRATCH}/sub-${SUBJECT} -nocleanup
+# Create 5tt visualisations for QC
+5tt2vis ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt.mif ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt_vis.mif -force
+5tt2vis ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt_coreg.mif ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt_vis_coreg.mif -force
+
+dwi2response dhollander \
+	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_DWI.mif \
+	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_RF_WM.txt \
+	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_RF_GM.txt \
+	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_RF_CSF.txt \
+	-voxels ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_RF_voxels.mif

@@ -3,15 +3,35 @@
 # modified by CHEN Hao
 # modified by Timo Kvamme
 
-org_file=aparc.a2009s+aseg.mgz # Destrieux atlas
 
-SUBJECT=$1
-root_dir=${FREESURFER_HOME}
-FREESURFER_DATA_DIR=/scratch7/MINDLAB2016_MR-SensCogFromNeural/results/freesurfer/sub-${SUBJECT}
-MRTRIX3_DIR=/scratch7/MINDLAB2016_MR-SensCogFromNeural/results/mrtrix3/sub-${SUBJECT}
-OUTPUT_DIR=/scratch7/MINDLAB2016_MR-SensCogFromNeural/results/mrtrix3_Destrieux/sub-${SUBJECT}
-TT5_DIR=/scratch7/MINDLAB2016_MR-SensCogFromNeural/results/5tt/sub-${SUBJECT}
-COSTLABELSGMFIX_DIR=/users/chenhao/Documents/projects/ebbinghaus/MR/costlabelsgmfix
+
+SCRIPT_DIR="/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra"
+
+csv_file="${SCRIPT_DIR}/krakow_id_correspondance_clean.csv"
+# Lookup FREESURFER_SUBJECT
+FREESURFER_SUBJECT=$(awk -F',' -v subject="$SUBJECT" '
+NR > 1 && $2 ~ subject {
+    gsub(/"/, "", $3);
+    print $3;
+}' "$csv_file")
+# Error handling
+if [[ -z $FREESURFER_SUBJECT ]]; then
+  echo "Error: Could not find FREESURFER_SUBJECT (krakow_id) for SUBJECT=$SUBJECT in $csv_file"
+  exit 1
+fi
+echo "Processing SUBJECT=$SUBJECT with FREESURFER_SUBJECT=$FREESURFER_SUBJECT"
+
+FREESURFER_DIR=$root_dir/timo/krakow_rsfmri_raw/freesurfer/sub-${FREESURFER_SUBJECT}
+
+MRTRIX3_DIR=$root_dir/results/mrtrix3
+
+OUTPUT_DIR=$MRTRIX3_DIR/sub-${SUBJECT}
+CFIN_DIR=${root_dir}
+MASK_DIR="${CFIN_DIR}/maskskurtosis2024/${SUBJECT}/*/MR/KURTOSIS/NATSPACE"
+RESPONSE_DIR=$MRTRIX3_DIR/average_response
+T1_DIR=$FREESURFER_DIR/mri
+SCRATCH=$MRTRIX3_DIR/5tt
+org_file=aparc.a2009s+aseg.mgz # Destrieux atlas
 #
 
 LUT_DIR=/users/chenhao/Documents/projects/ebbinghaus/MR
