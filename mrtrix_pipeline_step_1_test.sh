@@ -76,29 +76,15 @@ SCRATCH=$MRTRIX3_DIR/5tt
 # Script for processing CFIN pipeline output with MRtrix3 for tractography
 
 
-transformconvert ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_fsl_bbr.mat \
-	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0_brain.nii.gz \
-	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz \
-	flirt_import ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_mrtrix_bbr.txt
+mkdir -p ${OUTPUT_DIR}
 
-#old:  ${T1_DIR}/sub-${SUBJECT}_run-01_T1w.nii.gz \
-mrtransform ${T1_DIR}/T1.mgz \
-	-linear ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_mrtrix_bbr.txt \
-	-inverse ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_coreg.mif
+mrcat ${CFIN_DIR}/datakurtosis2024/${SUBJECT}/*/MR/KURTOSIS_DIRS/NATSPACE/*nii ${OUTPUT_DIR}/temp.mif
 
-mrtransform ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt.mif \
-	-linear ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_mrtrix_bbr.txt \
-	-inverse ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt_coreg.mif
+mrconvert \
+	${OUTPUT_DIR}/temp.mif \
+	-fslgrad \
+	${CFIN_DIR}/infokurtosis2024/${SUBJECT}/*/MR/KURTOSIS/diffusion.bvec \
+	${CFIN_DIR}/infokurtosis2024/${SUBJECT}/*/MR/KURTOSIS/diffusion.bval \
+	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_DWI.mif
 
-rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w*.nii.gz
-
-# Create 5tt visualisations for QC
-5tt2vis ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt.mif ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt_vis.mif -force
-5tt2vis ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt_coreg.mif ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt_vis_coreg.mif -force
-
-dwi2response dhollander \
-	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_DWI.mif \
-	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_RF_WM.txt \
-	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_RF_GM.txt \
-	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_RF_CSF.txt \
-	-voxels ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_RF_voxels.mif
+rm ${OUTPUT_DIR}/temp.mif

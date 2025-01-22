@@ -3,17 +3,18 @@
 # NeurArchCon Diffusion Script - Processes Freesurfer data for a given subject
 # see timo_notes first - you need to run "conda activate mrtrix" every time
 
+conda init
 conda activate mrtrix
 
 # stand in the folder
 # cd /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra
 # you might need to run:
-# chmod +x mrtrix_pipeline_step_1_test.sh
+# chmod +x mrtrix_pipeline_step_1.sh
 
 # and for the freesurfer
 # chmod -R u+r /projects/MINDLAB2016_MR-SensCogFromNeural/scratch/timo/krakow_rsfmri_raw/freesurfer/
 
-# ./mrtrix_pipeline_step_1_test.sh 0002 /projects/2022_MR-SensCogGlobal/scratch
+# ./mrtrix_pipeline_step_1.sh 0002 /projects/2022_MR-SensCogGlobal/scratch
 
 
 
