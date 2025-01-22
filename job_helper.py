@@ -3,12 +3,12 @@ import shutil
 import os
 import time
 
-def submit_job(subject_id, job_name_template, log_out_template, log_err_template, script_path, scratch_dir, email=""):
+def submit_job(subject_id, log_out_template, log_err_template, script_path, scratch_dir, email=""):
     """
     Submits a job to the cluster for the given subject ID with customizable parameters.
     Optionally sends an email notification upon job completion if an email is provided.
     """
-    job_name = job_name_template.format(subject_id=subject_id)
+    job_name = f"job_{subject_id}_{script_path}".format(subject_id=subject_id,script_path=script_path)
     log_out = log_out_template.format(subject_id=subject_id)
     log_err = log_err_template.format(subject_id=subject_id)
 

@@ -37,7 +37,7 @@ script_paths = {
     "step_1": "mrtrix_pipeline_step_1_test.sh",
     "step_2": "mrtrix_pipeline_step_2.sh",
     "step_3": "mrtrix_pipeline_step_3.sh",
-    "step_4_mu_coeff": "mrtrix_pipeline_step_4_mu_coeff.sh",
+    "step_4_mu_coeff": "mrtrix_pipeline_step_4.sh",
     "step_5_desikan": "mrtrix_pipeline_step_5_desikan.sh",
     "step_5_destrieux": "mrtrix_pipeline_step_5_destrieux.sh"
 }

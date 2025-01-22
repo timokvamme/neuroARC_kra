@@ -3,7 +3,7 @@
 # NeurArchCon Diffusion Script
 
 
-echo "running mrtrix_pipeline_step_4_mu_coeff.sh"
+echo "running mrtrix_pipeline_step_4.sh"
 
 # Load environment setup
 source /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/setup_env.sh
@@ -11,12 +11,12 @@ source /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/setup_env.sh
 # stand in the folder
 # cd /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra
 # you might need to run:
-# chmod +x mrtrix_pipeline_step_4_mu_coeff.sh
+# chmod +x mrtrix_pipeline_step_4.sh
 
 # and for the freesurfer
 # chmod -R u+r /projects/MINDLAB2016_MR-SensCogFromNeural/scratch/timo/krakow_rsfmri_raw/freesurfer/
 
-# ./mrtrix_pipeline_step_1.sh 0002 /projects/2022_MR-SensCogGlobal/scratch
+# ./mrtrix_pipeline_step_4.sh 0002 /projects/2022_MR-SensCogGlobal/scratch
 
 
 SUBJECT=$1  # e.g., 0002
