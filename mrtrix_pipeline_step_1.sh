@@ -25,14 +25,6 @@ if [[ -z $SUBJECT || -z $root_dir ]]; then
   exit 1
 fi
 
-# Define subject-specific directories
-MRTRIX3_DIR=$root_dir/results/mrtrix3
-OUTPUT_DIR=$MRTRIX3_DIR/sub-${SUBJECT}
-CFIN_DIR=${root_dir}
-MASK_DIR="${CFIN_DIR}/maskskurtosis2024/${SUBJECT}/*/MR/KURTOSIS/NATSPACE"
-RESPONSE_DIR=$MRTRIX3_DIR/average_response
-T1_DIR=$FREESURFER_DIR/mri
-SCRATCH=$MRTRIX3_DIR/5tt
 
 # Lookup FREESURFER_SUBJECT
 SCRIPT_DIR="/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra"
@@ -62,6 +54,15 @@ if [[ ! -d $FREESURFER_DIR ]]; then
   echo "Error: Freesurfer directory does not exist: $FREESURFER_DIR"
   exit 1
 fi
+
+# Define subject-specific directories
+MRTRIX3_DIR=$root_dir/results/mrtrix3
+OUTPUT_DIR=$MRTRIX3_DIR/sub-${SUBJECT}
+CFIN_DIR=${root_dir}
+MASK_DIR="${CFIN_DIR}/maskskurtosis2024/${SUBJECT}/*/MR/KURTOSIS/NATSPACE"
+RESPONSE_DIR=$MRTRIX3_DIR/average_response
+T1_DIR=$FREESURFER_DIR/mri
+SCRATCH=$MRTRIX3_DIR/5tt
 
 # Print paths for verification
 echo "Directories setup:"

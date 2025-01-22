@@ -2,6 +2,7 @@
 
 echo "running mrtrix_pipeline_step_1_test.sh"
 
+
 # Load environment setup
 source /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/setup_env.sh
 
@@ -25,14 +26,6 @@ if [[ -z $SUBJECT || -z $root_dir ]]; then
   exit 1
 fi
 
-# Define subject-specific directories
-MRTRIX3_DIR=$root_dir/results/mrtrix3
-OUTPUT_DIR=$MRTRIX3_DIR/sub-${SUBJECT}
-CFIN_DIR=${root_dir}
-MASK_DIR="${CFIN_DIR}/maskskurtosis2024/${SUBJECT}/*/MR/KURTOSIS/NATSPACE"
-RESPONSE_DIR=$MRTRIX3_DIR/average_response
-T1_DIR=$FREESURFER_DIR/mri
-SCRATCH=$MRTRIX3_DIR/5tt
 
 # Lookup FREESURFER_SUBJECT
 SCRIPT_DIR="/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra"
@@ -63,6 +56,15 @@ if [[ ! -d $FREESURFER_DIR ]]; then
   exit 1
 fi
 
+# Define subject-specific directories
+MRTRIX3_DIR=$root_dir/results/mrtrix3
+OUTPUT_DIR=$MRTRIX3_DIR/sub-${SUBJECT}
+CFIN_DIR=${root_dir}
+MASK_DIR="${CFIN_DIR}/maskskurtosis2024/${SUBJECT}/*/MR/KURTOSIS/NATSPACE"
+RESPONSE_DIR=$MRTRIX3_DIR/average_response
+T1_DIR=$FREESURFER_DIR/mri
+SCRATCH=$MRTRIX3_DIR/5tt
+
 # Print paths for verification
 echo "Directories setup:"
 echo "OUTPUT_DIR=$OUTPUT_DIR"
@@ -70,6 +72,8 @@ echo "MASK_DIR=$MASK_DIR"
 echo "T1_DIR=$T1_DIR"
 echo "SCRATCH=$SCRATCH"
 
+
+echo "Script starting succesfully for $SUBJECT."
 
 echo "Script starting succesfully for $SUBJECT."
 
