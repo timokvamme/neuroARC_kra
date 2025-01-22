@@ -67,26 +67,24 @@ for ((i=0; i<${#SELECTED_SUBJECTS[@]}-1; i++)); do
     SUBJECT="${SELECTED_SUBJECTS[i]}"
     echo "Submitting job for subject: $SUBJECT"
 
-    qsub -q long.q \
-         -cwd \
-         -S /bin/bash \
+    qsub -b y /bin/bash -c "$JOB_SCRIPT $SUBJECT /projects/2022_MR-SensCogGlobal/scratch" \
+         -q long.q \
          -o "${LOG_DIR}/job_${SUBJECT}.out" \
          -e "${LOG_DIR}/job_${SUBJECT}.err" \
-         -N "job_${SUBJECT}" \
-         -v SUBJECT="$SUBJECT",JOB_SCRIPT="$JOB_SCRIPT" \
-         submit_job.sh
+         -N "job_${SUBJECT}"
 done
 
 # Submit the last subject with email notification
 LAST_SUBJECT="${SELECTED_SUBJECTS[-1]}"
 echo "Submitting final job with email notification for subject: $LAST_SUBJECT"
 
-qsub -q long.q \
-     -cwd \
-     -S /bin/bash \
+qsub -b y /bin/bash -c "$JOB_SCRIPT $LAST_SUBJECT /projects/2022_MR-SensCogGlobal/scratch" \
+     -q long.q \
      -m e -M timo@cfin.au.dk \
      -o "${LOG_DIR}/job_${LAST_SUBJECT}.out" \
      -e "${LOG_DIR}/job_${LAST_SUBJECT}.err" \
-     -N "job_${LAST_SUBJECT}" \
-     -v SUBJECT="$LAST_SUBJECT",JOB_SCRIPT="$JOB_SCRIPT" \
-     submit_job.sh
+     -N "job_${LAST_SUBJECT}"
+
+
+
+

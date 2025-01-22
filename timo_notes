@@ -84,9 +84,15 @@ export LD_LIBRARY_PATH=$FSLDIR/lib:$LD_LIBRARY_PATH
 export FSLOUTPUTTYPE=NIFTI_GZ
 source $FSLDIR/etc/fslconf/fsl.sh
 
+
+# for some reason for it to work i need to run: (in the terminal) before i do anything.
 conda activate mrtrix
+export PATH="/users/timo/anaconda3/envs/mrtrix/bin:$PATH"
 
 
+
+# use python --version,
+# and mrinfo to veryfy that its python 3.10 not 3.11 or 12.  and mrtrix 3.0.4 not MRtrix 3.0_RC2-90-g21f3d913
 
 
 
