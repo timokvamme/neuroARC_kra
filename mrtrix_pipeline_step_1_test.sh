@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "running mrtrix_pipeline_step_1_test.sh"
 
+echo "running mrtrix_pipeline_step_1_test.sh"
 
 # Load environment setup
 source /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/setup_env.sh
@@ -75,7 +75,6 @@ echo "SCRATCH=$SCRATCH"
 
 echo "Script starting succesfully for $SUBJECT."
 
-echo "Script starting succesfully for $SUBJECT."
 
 # Script for processing CFIN pipeline output with MRtrix3 for tractography
 
