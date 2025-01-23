@@ -115,7 +115,7 @@ tckgen ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_WM_FOD_norm.mif ${OUTPUT_DIR}/sub-${S
   	-maxlength 250 \
   	-minlength 20 \
   	-select 10M \
-  	-nthreads 10 \
+  	-nthreads 8 \
   	-cutoff 0.06
 
 

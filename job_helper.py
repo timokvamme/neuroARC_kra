@@ -14,7 +14,8 @@ def submit_job(subject_id, log_out_template, log_err_template, script_path, scra
     Submits a job to the cluster for the given subject ID with customizable parameters.
     Optionally sends an email notification upon job completion if an email is provided.
     """
-    job_name = f"job_{subject_id}_{script_path}".format(subject_id=subject_id,script_path=script_path)
+    script_path_last_9 = script_path[-9:]
+    job_name = f"job_{subject_id}_{script_path_last_9}".format(subject_id=subject_id,script_path_last_9=script_path_last_9)
     log_out = log_out_template.format(subject_id=subject_id)
     log_err = log_err_template.format(subject_id=subject_id)
 
@@ -22,7 +23,7 @@ def submit_job(subject_id, log_out_template, log_err_template, script_path, scra
 
     submit_command = [
         qsub_path,
-        "-q", "long.q",
+        "-q", "all.q",
         "-o", log_out,
         "-e", log_err,
         "-N", job_name,
@@ -151,7 +152,7 @@ def cleanup_subject(subject_id, results_dir, logs_dir):
 
 
 # Function to process subjects in batches
-def process_subjects_in_batches(step_name, subjects, root_dir, batch_size):
+def process_subjects_in_batches(step_name, subjects, root_dir, batch_size,script_paths,results_dir,logs_dir,check_interval):
     """Submits jobs in batches and waits for completion."""
     script_path = script_paths[step_name]
     job_ids = []
@@ -171,7 +172,7 @@ def process_subjects_in_batches(step_name, subjects, root_dir, batch_size):
 
             # Submit job
             job_id = submit_job(subject_id, log_out_template, log_err_template, script_path, root_dir,
-                                email="timo@cfin.au.dk")
+                                email="")
 
             if job_id:
                 job_ids.append(job_id)

@@ -74,6 +74,8 @@ os.environ["PATH"] += os.pathsep + "/usr/local/common/GridEngine/bin/lx-amd64"
 os.chdir("/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra")
 all_subjects = np.array(pd.read_csv("krakow_id_correspondance_clean.csv", dtype=str)["storm_db_id"])
 
+all_subjects = all_subjects[:20]  # Limit to first 20 subjects for testing
+
 # Define parameters
 root_dir = "/projects/2022_MR-SensCogGlobal/scratch"
 batch_size = 10
@@ -108,7 +110,7 @@ logs_dir = "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/logs"
 for step in steps_to_run.keys():
     if steps_to_run[step]:
         print(f"Starting {step} for all subjects...")
-        process_subjects_in_batches(step, all_subjects, root_dir, batch_size)
+        process_subjects_in_batches(step, all_subjects, root_dir, batch_size,script_paths,results_dir,logs_dir,check_interval)
         print(f"Completed {step} for all subjects.")
 
 print("All pipeline steps completed successfully.")
