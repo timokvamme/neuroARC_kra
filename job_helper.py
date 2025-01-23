@@ -1,7 +1,13 @@
+
+
+
 import subprocess
 import shutil
 import os
 import time
+import subprocess, os
+import numpy as np
+import pandas as pd
 
 def submit_job(subject_id, log_out_template, log_err_template, script_path, scratch_dir, email=""):
     """
@@ -142,3 +148,38 @@ def cleanup_subject(subject_id, results_dir, logs_dir):
             print(f"Log file does not exist: {log_file}")
 
     print(f"Cleanup completed for subject {subject_id}.")
+
+
+# Function to process subjects in batches
+def process_subjects_in_batches(step_name, subjects, root_dir, batch_size):
+    """Submits jobs in batches and waits for completion."""
+    script_path = script_paths[step_name]
+    job_ids = []
+
+    for i in range(0, len(subjects), batch_size):
+        batch = subjects[i:i + batch_size]
+
+        for subject_id in batch:
+            print(f"Processing {step_name} for subject {subject_id}")
+
+            # Cleanup previous logs and data
+            cleanup_subject(subject_id, results_dir, logs_dir)
+
+            # Define log paths for the subject
+            log_out_template = f"/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/logs/job_{subject_id}.out"
+            log_err_template = f"/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/logs/job_{subject_id}.err"
+
+            # Submit job
+            job_id = submit_job(subject_id, log_out_template, log_err_template, script_path, root_dir,
+                                email="timo@cfin.au.dk")
+
+            if job_id:
+                job_ids.append(job_id)
+            else:
+                print(f"Failed to submit job for subject {subject_id}")
+
+        # Wait for the current batch of jobs to complete before moving to the next batch
+        for job_id in job_ids:
+            wait_for_job_completion(job_id, check_interval)
+
+        job_ids.clear()  # Clear job IDs for the next batch

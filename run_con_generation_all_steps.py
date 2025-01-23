@@ -1,129 +1,118 @@
+
 # by Timo Kvamme (Timokvamme@gmail.com)
+#Doc
+"""
+#
+# This script automates the processing of neuroimaging data for multiple subjects
+# by submitting jobs to a cluster running the Grid Engine (SGE) scheduling system.
+#
+# **Purpose:**
+# The script ensures that:
+#  - Multiple subjects are processed in parallel while respecting cluster job limits.
+#  - Jobs are submitted in batches (e.g., 10 at a time) to avoid overloading the cluster.
+#  - Steps are executed sequentially for all subjects (Step 1 must complete for all before Step 2 starts, etc.).
+#
+# **Requirements:**
+# - For a complete setup look through timo_install_notes.txt
+# - Necessary environment variables for Grid Engine and FreeSurfer must be set correctly.
+# - Required dependencies: pandas, numpy, subprocess, shutil, os, time
+#
+# **Structure:**
+# - The script reads subject IDs from a CSV file containing their corresponding IDs.
+# - It defines which processing steps to run (steps 1 to 5).
+# - Each step's pipeline script is executed in a controlled manner.
+# - Cleanup functions ensure fresh data processing before new submissions.
+#
+# **Execution Flow:**
+# 1. Load subject IDs from CSV.
+# 2. Loop through processing steps, submitting jobs in batches of 10.
+# 3. Wait for each batch to complete before proceeding.
+# 4. Logs and job outputs are stored per subject for tracking and debugging.
+#
+# **Usage Instructions:**
+# 1. Ensure the necessary environment variables are set:
+#    - `SGE_ROOT` should point to the Grid Engine installation path.
+#    - `PATH` should include Grid Engine binary location.
+#
+# 2. Activate the correct Conda environment:
+#    ```bash
+#    source /users/timo/anaconda3/etc/profile.d/conda.sh && conda activate mrtrix
+#    ```
+#
+# 3. Run the script using:
+#    ```bash
+#    python run_pipeline.py
+#    ```
+#
+# **Key Files:**
+# - `job_helper.py`: Contains helper functions for job submission, waiting, and cleanup.
+# - `krakow_id_correspondance_clean.csv`: Maps subject IDs.
+# - `mrtrix_pipeline_step_X.sh`: The processing scripts for each step.
+#
+# **Example:**
+# ```python
+# from job_helper import submit_job, wait_for_job_completion, cleanup_subject
+#
+# subject_id = "0005"
+# submit_job(subject_id, "logs/job_0005.out", "logs/job_0005.err", "mrtrix_pipeline_step_1.sh", "/scratch", email="timo@cfin.au.dk")
+# ```
+#
+# **Notes:**
+# - The script will stop execution if an error occurs during job submission.
+# - Email notifications can be enabled to receive job status updates.
+#
+# Look at `run_job.py` or `job_helper.py` for a simplified version of the workflow.
+"""
 
-# import
-import subprocess, os
-from stormdb.access import Query
-import pandas as pd
-import numpy as np
+from job_helper import *
 
-# define subjects and root
-# q = Query('2022_MR-SensCogGlobal')
-# subjects_XXX = q.get_subjects()
-# all_subjects = [subject.split('_')[0] for subject in subjects_XXX]
+# Set environment variables for Grid Engine
+os.environ["SGE_ROOT"] = "/usr/local/common/GridEngine"
+os.environ["PATH"] += os.pathsep + "/usr/local/common/GridEngine/bin/lx-amd64"
 
+# Load subject IDs
 os.chdir("/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra")
-# subjects we have freesurfer on
 all_subjects = np.array(pd.read_csv("krakow_id_correspondance_clean.csv", dtype=str)["storm_db_id"])
 
-# Define the root directory and subject IDs
+# Define parameters
 root_dir = "/projects/2022_MR-SensCogGlobal/scratch"
-subjects = all_subjects
-subjects = ["0002"]  # Add all your subject IDs here
+batch_size = 10
+check_interval = 60  # Time in seconds to wait between job status checks
 
-
-# Define the configuration for which steps to run (1 to run, 0 to skip)
+# Configuration for steps to run
 steps_to_run = {
     "step_1": 1,
-    "step_2": 0,
-    "step_3": 0,
-    "step_4_mu_coeff": 0,
+    "step_2": 1,
+    "step_3": 1,
+    "step_4": 1,
     "step_5_desikan": 0,
     "step_5_destrieux": 0
 }
 
-
-# Paths to scripts
+# Paths to script files
 script_paths = {
-    "step_1": "mrtrix_pipeline_step_1_test.sh",
-    "step_2": "mrtrix_pipeline_step_2.sh",
-    "step_3": "mrtrix_pipeline_step_3.sh",
-    "step_4_mu_coeff": "mrtrix_pipeline_step_4.sh",
-    "step_5_desikan": "mrtrix_pipeline_step_5_desikan.sh",
-    "step_5_destrieux": "mrtrix_pipeline_step_5_destrieux.sh"
+    "step_1": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_1.sh",
+    "step_2": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_2.sh",
+    "step_3": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_3.sh",
+    "step_4": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_4.sh",
+    "step_5_desikan": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_5_desikan.sh",
+    "step_5_destrieux": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_5_destrieux.sh"
 }
 
-def run_step_for_all_subjects(step_name, subjects, root_dir):
-    """Run a specific step script for all subjects."""
-    script = script_paths[step_name]
-    for subject in subjects:
-        try:
-            print(f"Running {script} for SUBJECT={subject}")
-            subprocess.run([f"./{script}", subject, root_dir], check=True)
-        except subprocess.CalledProcessError as e:
-            print(f"Error while running {script} for SUBJECT={subject}: {e}")
-            break  # Stop if an error occurs
+# Directory paths
+results_dir = "/projects/2022_MR-SensCogGlobal/scratch/results/mrtrix3"
+logs_dir = "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/logs"
 
-# Run all steps sequentially for all subjects
-for step in ["step_1", "step_2", "step_3", "step_4_mu_coeff", "step_5_desikan", "step_5_destrieux"]:
+
+# Run pipeline steps sequentially
+for step in steps_to_run.keys():
     if steps_to_run[step]:
         print(f"Starting {step} for all subjects...")
-        run_step_for_all_subjects(step, subjects, root_dir)
+        process_subjects_in_batches(step, all_subjects, root_dir, batch_size)
         print(f"Completed {step} for all subjects.")
 
-print("All steps completed.")
+print("All pipeline steps completed successfully.")
 
 
 
 
-from stormdb.cluster import ClusterJob
-import subprocess
-
-# Define the full path to qsub
-qsub_path = "/usr/local/common/GridEngine/bin/lx-amd64/qsub"
-
-# Job parameters
-root_dir = "/projects/2022_MR-SensCogGlobal/scratch"
-subject = "0003"
-script_name = "mrtrix_pipeline_step_1.sh"
-queue = "short.q"
-job_name = "mrtrix_test"
-proj_name = "2022_MR-SensCogGlobal"
-
-# Construct submission command for bash script
-submit_cmd = f"source /usr/local/common/GridEngine/default/common/settings.sh && {qsub_path} -q {queue} -N {job_name} -cwd -b y bash {script_name} {subject} {root_dir}"
-
-try:
-    subprocess.run(submit_cmd, shell=True, check=True)
-    print(f"Job {job_name} submitted successfully for SUBJECT={subject} to cluster.")
-except subprocess.CalledProcessError as e:
-    print(f"Error submitting job: {e}")
-
-
-
-
-import subprocess
-
-# Define the full path to qsub
-qsub_path = "/usr/local/common/GridEngine/bin/lx-amd64/qsub"
-
-# Job parameters
-script_name = "test_bash.sh"
-queue = "short.q"
-job_name = "test_10min_job"
-
-# Construct submission command for bash script
-submit_cmd = f"source /usr/local/common/GridEngine/default/common/settings.sh && {qsub_path} -q {queue} -N {job_name} -cwd -b y bash {script_name}"
-
-try:
-    subprocess.run(submit_cmd, shell=True, check=True)
-    print(f"Job {job_name} submitted successfully to cluster.")
-except subprocess.CalledProcessError as e:
-    print(f"Error submitting job: {e}")
-
-
-
-def check_job_status():
-    qstat_path = "/usr/local/common/GridEngine/bin/lx-amd64/qstat"
-
-    try:
-        result = subprocess.run([qstat_path], capture_output=True, text=True, check=True)
-        print("Current job status:\n")
-        print(result.stdout)
-    except subprocess.CalledProcessError as e:
-        print("Error checking job status:", e)
-    except FileNotFoundError:
-        print(f"Error: Could not find qstat at {qstat_path}")
-
-
-# Call function to check status
-check_job_status()

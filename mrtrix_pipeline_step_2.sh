@@ -76,6 +76,6 @@ echo "Script starting succesfully for $SUBJECT."
 
 mkdir ${RESPONSE_DIR}
 
-responsemean ${MRTRIX3_DIR}/sub-*/sub-*_run-01_RF_WM.txt $RESPONSE_DIR/group_average_response_wm.txt
-responsemean ${MRTRIX3_DIR}/sub-*/sub-*_run-01_RF_GM.txt $RESPONSE_DIR/group_average_response_gm.txt
-responsemean ${MRTRIX3_DIR}/sub-*/sub-*_run-01_RF_CSF.txt $RESPONSE_DIR/group_average_response_csf.txt
+responsemean ${MRTRIX3_DIR}/sub-*/sub-*_run-01_RF_WM.txt $RESPONSE_DIR/group_average_response_wm.txt -force
+responsemean ${MRTRIX3_DIR}/sub-*/sub-*_run-01_RF_GM.txt $RESPONSE_DIR/group_average_response_gm.txt -force
+responsemean ${MRTRIX3_DIR}/sub-*/sub-*_run-01_RF_CSF.txt $RESPONSE_DIR/group_average_response_csf.txt -force
