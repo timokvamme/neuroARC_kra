@@ -159,7 +159,6 @@ def process_subjects_in_batches(step_name, subjects, root_dir, batch_size,script
 
     for i in range(0, len(subjects), batch_size):
         batch = subjects[i:i + batch_size]
-
         for subject_id in batch:
             print(f"Processing {step_name} for subject {subject_id}")
 

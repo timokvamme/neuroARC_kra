@@ -107,6 +107,10 @@ logs_dir = "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/logs"
 
 
 # Run pipeline steps sequentially
+
+for subject_id in all_subjects:
+    cleanup_subject(subject_id, results_dir, logs_dir)
+
 for step in steps_to_run.keys():
     if steps_to_run[step]:
         print(f"Starting {step} for all subjects...")
