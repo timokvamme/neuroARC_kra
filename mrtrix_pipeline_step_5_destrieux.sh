@@ -32,16 +32,17 @@ RESPONSE_DIR=$MRTRIX3_DIR/average_response
 T1_DIR=$FREESURFER_DIR/mri
 SCRATCH=$MRTRIX3_DIR/5tt
 org_file=aparc.a2009s+aseg.mgz # Destrieux atlas
+LUT_FILE="${SCRIPT_DIR}/FreeSurferColorLUT.txt"
 #
 
-LUT_DIR=/users/chenhao/Documents/projects/ebbinghaus/MR
+
 mkdir ${OUTPUT_DIR}
 
 labelconvert \
-	${FREESURFER_DATA_DIR}/mri/${org_file} \
-	${root_dir}/FreeSurferColorLUT.txt \
-	${LUT_DIR}/${lut_file} ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes.mif \
-	-nthreads 0
+    "${FREESURFER_DATA_DIR}/mri/${org_file}" \
+    "${LUT_FILE}" \
+    "${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes.mif" \
+    -nthreads 0
 
 ${COSTLABELSGMFIX_DIR}/costlabelsgmfix \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes.mif \
