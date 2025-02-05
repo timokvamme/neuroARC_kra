@@ -9,7 +9,7 @@ source /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/setup_env.sh
 # stand in the folder
 # cd /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra
 # you might need to run:
-# chmod +x mrtrix_pipeline_step_1.sh
+# chmod +x mrtrix_pipeline_step_1_test_flirt.sh
 
 # and for the freesurfer
 # chmod -R u+r /projects/MINDLAB2016_MR-SensCogFromNeural/scratch/timo/krakow_rsfmri_raw/freesurfer/

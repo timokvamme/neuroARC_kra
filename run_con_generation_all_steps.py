@@ -75,6 +75,8 @@ os.chdir("/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra")
 all_subjects = np.array(pd.read_csv("krakow_id_correspondance_clean.csv", dtype=str)["storm_db_id"])
 
 all_subjects = all_subjects[10:20]  # Limit to first 20 subjects for testing
+all_subjects = ["0004","0011"]
+
 
 
 # Define parameters
@@ -94,8 +96,8 @@ steps_to_run = {
 
 # Paths to script files
 script_paths = {
-    #"step_1": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_1_test_flirt.sh",
-    "step_1": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_1.sh",
+    "step_1": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_1_test_flirt.sh",
+    #"step_1": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_1.sh",
     "step_2": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_2.sh",
     "step_3": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_3.sh",
     "step_4": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_4.sh",
