@@ -112,7 +112,9 @@ rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.mgz
 rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w.mgz
 # rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg.mgz
 
-fast ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz
+# suggested change -p by Claude, after we are using a newer? version of fast/fsl?.
+
+fast -p ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz
 mv ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pve_2.nii.gz ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg.nii.gz
 rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pve_0.nii.gz
 rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pve_1.nii.gz

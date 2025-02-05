@@ -75,7 +75,7 @@ os.chdir("/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra")
 all_subjects = np.array(pd.read_csv("krakow_id_correspondance_clean.csv", dtype=str)["storm_db_id"])
 
 all_subjects = all_subjects[10:20]  # Limit to first 20 subjects for testing
-all_subjects = ["0004","0011"]
+all_subjects = ["0004"]
 
 
 
@@ -96,8 +96,8 @@ steps_to_run = {
 
 # Paths to script files
 script_paths = {
-    "step_1": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_1_test_flirt.sh",
-    #"step_1": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_1.sh",
+    #"step_1": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_1_test_flirt.sh",
+    "step_1": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_1.sh",
     "step_2": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_2.sh",
     "step_3": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_3.sh",
     "step_4": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_4.sh",
@@ -124,5 +124,18 @@ for step in steps_to_run.keys():
 print("All pipeline steps completed successfully.")
 
 
-
-
+#
+#
+# import numpy as np
+# from nilearn import image
+# nifti_file = "/projects/2022_MR-SensCogGlobal/scratch/results/mrtrix3/sub-0004/sub-0004_run-01_mean_b0_brain.nii.gz"
+# img = image.load_img(nifti_file)
+#
+# # Convert to NumPy array
+# data = img.get_fdata()
+#
+# # Check for NaN values
+# num_nans = np.isnan(data).sum()
+# if num_nans > 0:print(f"❌ Found {num_nans} NaN values in the image data!")
+# else:print("✅ No NaN values found in the image.")
+#
