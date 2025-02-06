@@ -72,94 +72,92 @@ echo "T1_DIR=$T1_DIR"
 echo "SCRATCH=$SCRATCH"
 
 
-echo "Script starting succesfully for $SUBJECT."
 
-# Script for processing CFIN pipeline output with MRtrix3 for tractography
-# Add processing steps here...
+echo "Script starting successfully for $SUBJECT."
 
+### **Step 1: Prepare directories and process DWI data**
+echo "Step 1: Preparing directories and processing DWI data..."
 mkdir -p ${OUTPUT_DIR}
 
+# Concatenate all DWI images
 mrcat ${CFIN_DIR}/datakurtosis2024/${SUBJECT}/*/MR/KURTOSIS_DIRS/NATSPACE/*nii ${OUTPUT_DIR}/temp.mif
 
+# Convert to MRtrix format with FSL gradients
 mrconvert \
 	${OUTPUT_DIR}/temp.mif \
 	-fslgrad \
 	${CFIN_DIR}/infokurtosis2024/${SUBJECT}/*/MR/KURTOSIS/diffusion.bvec \
 	${CFIN_DIR}/infokurtosis2024/${SUBJECT}/*/MR/KURTOSIS/diffusion.bval \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_DWI.mif
-	
+
 rm ${OUTPUT_DIR}/temp.mif
 
-# Create 5tt image for ACT 
+### **Step 2: Generate 5tt image for Anatomically-Constrained Tractography (ACT)**
+echo "Step 2: Creating 5tt image for ACT..."
 5ttgen hsvs ${FREESURFER_DIR} ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt.mif -scratch ${SCRATCH}/sub-${SUBJECT} -nocleanup
 
-# Co-register T1w to B0
+### **Step 3: Extract mean b0 image and preprocess**
+echo "Step 3: Extracting mean b0 image..."
 dwiextract ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_DWI.mif - -bzero | \
 	mrmath - mean ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0.nii.gz -axis 3
 
 bet ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0.nii.gz ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0_brain.nii.gz
-# mrconvert -strides -1,2,3 ${FREESURFER_DIR}/mri/norm.mgz ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz
 
-mri_vol2vol --mov ${FREESURFER_DIR}/mri/brain.mgz --targ ${FREESURFER_DIR}/mri/rawavg.mgz --regheader --o ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.mgz --no-save-reg
-mri_vol2vol --mov ${FREESURFER_DIR}/mri/T1.mgz --targ ${FREESURFER_DIR}/mri/rawavg.mgz --regheader --o ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w.mgz --no-save-reg
-mri_label2vol --seg ${FREESURFER_DIR}/mri/wm.seg.mgz --temp ${FREESURFER_DIR}/mri/rawavg.mgz --o ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg.mgz --regheader ${FREESURFER_DIR}/mri/wm.seg.mgz
- 
-mri_convert -it mgz -ot nii ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.mgz ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz
-mri_convert -it mgz -ot nii ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w.mgz ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w.nii.gz
-mri_convert -it mgz -ot nii ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg.mgz ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg.nii.gz
+### **Step 4: FAST segmentation for white matter**
+echo "Step 4: Running FAST segmentation..."
 
-rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.mgz
-rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w.mgz
-# rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg.mgz
-
-# suggested change -p by Claude, after we are using a newer? version of fast/fsl?.
+# this is where things are different from https://github.com/MassimoLumaca/neuroARC/tree/main
+# we are using the -p flag to output the pve_2.nii.gz file
+# which we then binarize with fslmaths, and use that for input in flirt bbr as suggested by Claude.
 
 fast -p ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz
-mv ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pve_2.nii.gz ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg.nii.gz
+
+# Check if FAST produced the expected pve_2 output
+if [[ ! -f ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pve_2.nii.gz ]]; then
+  echo "Error: FAST segmentation failed for SUBJECT=$SUBJECT."
+  exit 1
+fi
+
+# Step 5: Binarize the white matter segmentation for FLIRT BBR
+echo "Step 5: Binarizing white matter segmentation..."
+fslmaths ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pve_2.nii.gz \
+         -thr 0.5 -bin \
+         ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg_bin.nii.gz
+
+# Cleanup unnecessary FAST outputs but keep original wm_seg intact
 rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pve_0.nii.gz
 rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pve_1.nii.gz
 rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_mixeltype.nii.gz
 rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pveseg.nii.gz
 rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_seg.nii.gz
 
-
+### **Step 6: Initial FLIRT affine registration**
+echo "Step 6: Running initial FLIRT registration..."
 flirt -in ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0_brain.nii.gz \
-	-ref ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz \
-	-dof 6 \
-	-omat ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_fsl_initial.mat
+      -ref ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz \
+      -dof 6 \
+      -omat ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_fsl_initial.mat
 
+### **Step 7: FLIRT with Boundary-Based Registration (BBR)**
+echo "Step 7: Running FLIRT with BBR..."
 flirt -in ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0_brain.nii.gz \
-	-ref ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz \
-	-dof 6 \
-	-cost bbr \
-	-wmseg ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg.nii.gz \
-	-init ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_fsl_initial.mat \
-	-omat ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_fsl_bbr.mat \
-	-schedule $FSLDIR/etc/flirtsch/bbr.sch
-	
+      -ref ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz \
+      -dof 6 \
+      -cost bbr \
+      -wmseg ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg_bin.nii.gz \
+      -init ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_fsl_initial.mat \
+      -omat ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_fsl_bbr.mat \
+      -schedule $FSLDIR/etc/flirtsch/bbr.sch
+
+### **Step 8: Post-registration processing**
+echo "Step 8: Post-registration transformations..."
 transformconvert ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_fsl_bbr.mat \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0_brain.nii.gz \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz \
 	flirt_import ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_mrtrix_bbr.txt
 
-#old:  ${T1_DIR}/sub-${SUBJECT}_run-01_T1w.nii.gz \
 mrtransform ${T1_DIR}/T1.mgz \
 	-linear ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_mrtrix_bbr.txt \
 	-inverse ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_coreg.mif
-	
-mrtransform ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt.mif \
-	-linear ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_mrtrix_bbr.txt \
-	-inverse ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt_coreg.mif
-	
-rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w*.nii.gz
-	
-# Create 5tt visualisations for QC
-5tt2vis ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt.mif ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt_vis.mif	
-5tt2vis ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt_coreg.mif ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt_vis_coreg.mif
 
-dwi2response dhollander \
-	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_DWI.mif \
-	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_RF_WM.txt \
-	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_RF_GM.txt \
-	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_RF_CSF.txt \
-	-voxels ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_RF_voxels.mif
+echo "Pipeline completed successfully for SUBJECT=$SUBJECT."

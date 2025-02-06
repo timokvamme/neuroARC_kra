@@ -78,8 +78,6 @@ echo "Script starting succesfully for $SUBJECT."
 
 # Script for processing CFIN pipeline output with MRtrix3 for tractography
 
-
-
 mkdir -p ${OUTPUT_DIR}
 
 mrcat ${CFIN_DIR}/datakurtosis2024/${SUBJECT}/*/MR/KURTOSIS_DIRS/NATSPACE/*nii ${OUTPUT_DIR}/temp.mif
