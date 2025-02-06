@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-echo "running mrtrix_pipeline_step_1_test.sh"
+echo "running mrtrix_pipeline_step_1_test_fast_flirt.sh"
 
 # Load environment setup
 source /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/setup_env.sh
@@ -9,12 +9,12 @@ source /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/setup_env.sh
 # stand in the folder
 # cd /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra
 # you might need to run:
-# chmod +x mrtrix_pipeline_step_1.sh
+# chmod +x mrtrix_pipeline_step_1_test_fast_flirt.sh
 
 # and for the freesurfer
 # chmod -R u+r /projects/MINDLAB2016_MR-SensCogFromNeural/scratch/timo/krakow_rsfmri_raw/freesurfer/
 
-# ./mrtrix_pipeline_step_1_test.sh 0004 /projects/2022_MR-SensCogGlobal/scratch
+# ./mrtrix_pipeline_step_1_test_fast_flirt.sh 0004 /projects/2022_MR-SensCogGlobal/scratch
 
 
 SUBJECT=$1  # e.g., 0002
@@ -78,38 +78,27 @@ echo "Script starting succesfully for $SUBJECT."
 
 # Script for processing CFIN pipeline output with MRtrix3 for tractography
 
+fast -p ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz
+mv ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pve_2.nii.gz ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg.nii.gz
+rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pve_0.nii.gz
+rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pve_1.nii.gz
+rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_mixeltype.nii.gz
+rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pveseg.nii.gz
+rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_seg.nii.gz
+
+flirt -in ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0_brain.nii.gz \
+      -ref ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz \
+      -dof 6 \
+      -omat ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_fsl_initial.mat \
 
 
-mkdir -p ${OUTPUT_DIR}
+flirt -in ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0_brain.nii.gz \
+      -ref ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz \
+      -dof 6 \
+      -cost bbr \
+      -wmseg ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg.nii.gz \
+      -init ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_fsl_initial.mat \
+      -omat ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_fsl_bbr.mat \
+      -schedule $FSLDIR/etc/flirtsch/bbr.sch
 
-mrcat ${CFIN_DIR}/datakurtosis2024/${SUBJECT}/*/MR/KURTOSIS_DIRS/NATSPACE/*nii ${OUTPUT_DIR}/temp.mif
 
-mrconvert \
-	${OUTPUT_DIR}/temp.mif \
-	-fslgrad \
-	${CFIN_DIR}/infokurtosis2024/${SUBJECT}/*/MR/KURTOSIS/diffusion.bvec \
-	${CFIN_DIR}/infokurtosis2024/${SUBJECT}/*/MR/KURTOSIS/diffusion.bval \
-	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_DWI.mif
-
-rm ${OUTPUT_DIR}/temp.mif
-
-# Create 5tt image for ACT
-5ttgen hsvs ${FREESURFER_DIR} ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt.mif -scratch ${SCRATCH}/sub-${SUBJECT} -nocleanup
-
-# Co-register T1w to B0
-dwiextract ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_DWI.mif - -bzero | \
-	mrmath - mean ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0.nii.gz -axis 3
-
-bet ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0.nii.gz ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0_brain.nii.gz
-# mrconvert -strides -1,2,3 ${FREESURFER_DIR}/mri/norm.mgz ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz
-
-mri_vol2vol --mov ${FREESURFER_DIR}/mri/brain.mgz --targ ${FREESURFER_DIR}/mri/rawavg.mgz --regheader --o ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.mgz --no-save-reg
-mri_vol2vol --mov ${FREESURFER_DIR}/mri/T1.mgz --targ ${FREESURFER_DIR}/mri/rawavg.mgz --regheader --o ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w.mgz --no-save-reg
-mri_label2vol --seg ${FREESURFER_DIR}/mri/wm.seg.mgz --temp ${FREESURFER_DIR}/mri/rawavg.mgz --o ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg.mgz --regheader ${FREESURFER_DIR}/mri/wm.seg.mgz
-
-mri_convert -it mgz -ot nii ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.mgz ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz
-mri_convert -it mgz -ot nii ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w.mgz ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w.nii.gz
-mri_convert -it mgz -ot nii ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg.mgz ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg.nii.gz
-
-rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.mgz
-rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w.mgz

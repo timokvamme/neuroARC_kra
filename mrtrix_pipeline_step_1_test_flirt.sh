@@ -9,12 +9,12 @@ source /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/setup_env.sh
 # stand in the folder
 # cd /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra
 # you might need to run:
-# chmod +x mrtrix_pipeline_step_1_test_flirt.sh
+# chmod +x mrtrix_pipeline_step_1_test_fast_p_fsl_math_flirt.sh
 
 # and for the freesurfer
 # chmod -R u+r /projects/MINDLAB2016_MR-SensCogFromNeural/scratch/timo/krakow_rsfmri_raw/freesurfer/
 
-# ./mrtrix_pipeline_step_1_test_flirt.sh 0004 /projects/2022_MR-SensCogGlobal/scratch
+# ./mrtrix_pipeline_step_1_test_fast_p_fsl_math_flirt.sh 0004 /projects/2022_MR-SensCogGlobal/scratch
 
 
 SUBJECT=$1  # e.g., 0002
@@ -78,6 +78,13 @@ echo "Script starting succesfully for $SUBJECT."
 
 # Script for processing CFIN pipeline output with MRtrix3 for tractography
 
+fast -p ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz
+mv ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pve_2.nii.gz ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg.nii.gz
+rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pve_0.nii.gz
+rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pve_1.nii.gz
+rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_mixeltype.nii.gz
+rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pveseg.nii.gz
+rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_seg.nii.gz
 
 flirt -in ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0_brain.nii.gz \
       -ref ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz \

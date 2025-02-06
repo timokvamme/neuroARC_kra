@@ -64,6 +64,8 @@
 # Look at `run_job.py` or `job_helper.py` for a simplified version of the workflow.
 """
 
+
+
 from job_helper import *
 
 # Set environment variables for Grid Engine
@@ -74,8 +76,8 @@ os.environ["PATH"] += os.pathsep + "/usr/local/common/GridEngine/bin/lx-amd64"
 os.chdir("/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra")
 all_subjects = np.array(pd.read_csv("krakow_id_correspondance_clean.csv", dtype=str)["storm_db_id"])
 
-all_subjects = all_subjects[10:20]  # Limit to first 20 subjects for testing
-all_subjects = ["0004"]
+all_subjects = all_subjects[0:10]  # Limit to first 20 subjects for testing
+all_subjects = ["0003","0004"]
 
 
 
@@ -96,8 +98,8 @@ steps_to_run = {
 
 # Paths to script files
 script_paths = {
-    #"step_1": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_1_test_flirt.sh",
-    "step_1": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_1.sh",
+    "step_1": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_1_test_fast_flirt.sh",
+    #"step_1": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_1_test.sh",
     "step_2": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_2.sh",
     "step_3": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_3.sh",
     "step_4": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_4.sh",
@@ -112,8 +114,8 @@ logs_dir = "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/logs"
 
 # Run pipeline steps sequentially
 
-for subject_id in all_subjects:
-    cleanup_subject(subject_id, results_dir, logs_dir)
+# for subject_id in all_subjects:
+#     cleanup_subject(subject_id, results_dir, logs_dir)
 
 for step in steps_to_run.keys():
     if steps_to_run[step]:
