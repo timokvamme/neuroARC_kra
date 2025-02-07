@@ -10,6 +10,7 @@ source /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/setup_env.sh
 # cd /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra
 # you might need to run:
 # chmod +x mrtrix_pipeline_step_5_destrieux.sh
+# chmod +x /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/costlabelsgmfix/costlabelsgmfix
 
 # and for the freesurfer
 # chmod -R u+r /projects/MINDLAB2016_MR-SensCogFromNeural/scratch/timo/krakow_rsfmri_raw/freesurfer/
@@ -87,7 +88,7 @@ labelconvert \
      -nthreads 0
 
 echo "Applying CostLabelSGMFix for anatomical corrections..."
-${COSTLABELSGMFIX_DIR}/costlabelsgmfix \
+${SCRIPT_DIR}/costlabelsgmfix/costlabelsgmfix \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes.mif \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz \
 	${SCRIPT_DIR}/fs_default.txt \
@@ -98,16 +99,16 @@ ${COSTLABELSGMFIX_DIR}/costlabelsgmfix \
 echo "Transforming corrected nodes to diffusion space..."
 mrtransform \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes_fixed.mif \
-	-linear ${MRTRIX3_DIR}/sub-${SUBJECT}_run-01_diff2struct_mrtrix_bbr.txt \
+	-linear ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_mrtrix_bbr.txt \
 	-inverse ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes_fixed_coreg.mif \
 	-nthreads 0
 
 echo "Generating structural connectome from tractography..."
 tck2connectome \
-	${MRTRIX3_DIR}/sub-${SUBJECT}_run-01_10M_prob.tck \
+	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_10M_prob.tck \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes_fixed_coreg.mif \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_connectome.csv \
-	-tck_weights_in ${MRTRIX3_DIR}/sub-${SUBJECT}_run-01_10M_prob.sift \
+	-tck_weights_in ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_10M_prob.sift \
 	-out_assignments ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_assignments.txt \
 	-nthreads 0
 
