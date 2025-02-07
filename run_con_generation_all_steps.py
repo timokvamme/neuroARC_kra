@@ -71,26 +71,28 @@ from job_helper import *
 # Set environment variables for Grid Engine
 os.environ["SGE_ROOT"] = "/usr/local/common/GridEngine"
 os.environ["PATH"] += os.pathsep + "/usr/local/common/GridEngine/bin/lx-amd64"
+# Directory paths
+results_dir = "/projects/2022_MR-SensCogGlobal/scratch/results/mrtrix3"
+logs_dir = "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/logs"
+root_dir = "/projects/2022_MR-SensCogGlobal/scratch"
 
 # Load subject IDs
 os.chdir("/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra")
-all_subjects = np.array(pd.read_csv("krakow_id_correspondance_clean.csv", dtype=str)["storm_db_id"])
+all_subjects = np.array(pd.read_csv("krakow_id_correspondance_clean.csv", dtype=str)["storm_db_id"]) # check lookup_id_krakow.R
 
 all_subjects = all_subjects[0:10]  # Limit to first 20 subjects for testing
 #all_subjects = ["0003","0004"]
 
-
-
 # Define parameters
-root_dir = "/projects/2022_MR-SensCogGlobal/scratch"
 batch_size = 10
 check_interval = 60  # Time in seconds to wait between job status checks
 
 # Configuration for steps to run
 steps_to_run = {
-    "step_1": 1,
+    "clean": 0,
+    "step_1": 0,
     "step_2": 0,
-    "step_3": 0,
+    "step_3": 1,
     "step_4": 0,
     "step_5_desikan": 0,
     "step_5_destrieux": 0
@@ -107,21 +109,26 @@ script_paths = {
     "step_5_destrieux": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_5_destrieux.sh"
 }
 
-# Directory paths
-results_dir = "/projects/2022_MR-SensCogGlobal/scratch/results/mrtrix3"
-logs_dir = "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/logs"
-
 
 # Run pipeline steps sequentially
 
-for subject_id in all_subjects:
-    cleanup_subject(subject_id, results_dir, logs_dir)
+if steps_to_run["clean"]:
+    for subject_id in all_subjects:
+        cleanup_subject(subject_id, results_dir, logs_dir)
+    steps_to_run.pop("clean")
 
 for step in steps_to_run.keys():
     if steps_to_run[step]:
-        print(f"Starting {step} for all subjects...")
-        process_subjects_in_batches(step, all_subjects, root_dir, batch_size,script_paths,results_dir,logs_dir,check_interval)
-        print(f"Completed {step} for all subjects.")
+        print(f"Running pipeline step: {step}")
+
+        if step == "step_2":
+            process_single_subject(step, all_subjects[0], root_dir, script_paths, logs_dir, check_interval)
+        else:
+            print(f"Starting {step} for all subjects...")
+            process_subjects_in_batches(step,all_subjects, root_dir, batch_size,script_paths,logs_dir,check_interval)
+            print(f"Completed {step} for all subjects.")
+
+
 
 print("All pipeline steps completed successfully.")
 

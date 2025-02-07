@@ -151,8 +151,42 @@ def cleanup_subject(subject_id, results_dir, logs_dir):
     print(f"Cleanup completed for subject {subject_id}.")
 
 
+
+def process_single_subject(step_name, subject_id, root_dir, script_paths, logs_dir, check_interval):
+    """
+    Submits a single job for a specific step and waits for its completion.
+
+    Parameters:
+        step_name (str): The step to run (e.g., "step_1", "step_2", etc.).
+        subject_id (str): The subject ID to process.
+        root_dir (str): Root directory for processing.
+        script_paths (dict): Dictionary containing script paths for different steps.
+        logs_dir (str): Directory for log files.
+        check_interval (int): Time in seconds between job status checks.
+    """
+    if step_name not in script_paths:
+        print(f"Error: Step {step_name} is not recognized.")
+        return
+
+    script_path = script_paths[step_name]
+
+    print(f"Processing {step_name} for subject {subject_id}")
+
+    # Define log paths for the subject
+    log_err = os.path.join(logs_dir, f"job_{subject_id}_{step_name}.err")
+
+    # Submit job
+    job_id = submit_job(subject_id, log_err, log_err, script_path, root_dir, email="")
+
+    if job_id:
+        print(f"Job {job_id} for subject {subject_id} submitted successfully.")
+        wait_for_job_completion(job_id, check_interval)
+    else:
+        print(f"Failed to submit job for subject {subject_id} in {step_name}.")
+
+
 # Function to process subjects in batches
-def process_subjects_in_batches(step_name, subjects, root_dir, batch_size,script_paths,results_dir,logs_dir,check_interval):
+def process_subjects_in_batches(step_name, subjects, root_dir, batch_size,script_paths,logs_dir,check_interval):
     """Submits jobs in batches and waits for completion."""
     script_path = script_paths[step_name]
     job_ids = []
@@ -162,15 +196,13 @@ def process_subjects_in_batches(step_name, subjects, root_dir, batch_size,script
         for subject_id in batch:
             print(f"Processing {step_name} for subject {subject_id}")
 
-            # Cleanup previous logs and data
-            cleanup_subject(subject_id, results_dir, logs_dir)
 
-            # Define log paths for the subject
-            log_out_template = f"/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/logs/job_{subject_id}.out"
+            # Define err paths for the subject
+            log_err_template = f"/{logs_dir}/sub_{subject_id}.err"
 
 
             # Submit job
-            job_id = submit_job(subject_id, log_out_template, log_out_template, script_path, root_dir,
+            job_id = submit_job(subject_id, log_err_template, log_err_template, script_path, root_dir,
                                 email="")
 
             if job_id:

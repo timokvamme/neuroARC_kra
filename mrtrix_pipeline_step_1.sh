@@ -73,15 +73,15 @@ echo "SCRATCH=$SCRATCH"
 
 
 
-echo "Script starting succesfully for $SUBJECT."
+echo "Script starting successfully for $SUBJECT."
 
-# Script for processing CFIN pipeline output with MRtrix3 for tractography
-# Add processing steps here...
-
+echo "Creating output directory..."
 mkdir -p ${OUTPUT_DIR}
 
+echo "Concatenating diffusion-weighted images..."
 mrcat ${CFIN_DIR}/datakurtosis2024/${SUBJECT}/*/MR/KURTOSIS_DIRS/NATSPACE/*nii ${OUTPUT_DIR}/temp.mif
 
+echo "Converting diffusion data to MRtrix format..."
 mrconvert \
 	${OUTPUT_DIR}/temp.mif \
 	-fslgrad \
@@ -91,35 +91,34 @@ mrconvert \
 
 rm ${OUTPUT_DIR}/temp.mif
 
-# Create 5tt image for ACT
+echo "Creating 5TT image for Anatomically-Constrained Tractography (ACT)..."
 5ttgen hsvs ${FREESURFER_DIR} ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt.mif -scratch ${SCRATCH}/sub-${SUBJECT} -nocleanup
 
-# Co-register T1w to B0
+echo "Extracting mean B0 image..."
 dwiextract ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_DWI.mif - -bzero | \
 	mrmath - mean ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0.nii.gz -axis 3
 
+echo "Performing brain extraction..."
 bet ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0.nii.gz ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0_brain.nii.gz
-# mrconvert -strides -1,2,3 ${FREESURFER_DIR}/mri/norm.mgz ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz
 
+echo "Co-registering T1-weighted images..."
 mri_vol2vol --mov ${FREESURFER_DIR}/mri/brain.mgz --targ ${FREESURFER_DIR}/mri/rawavg.mgz --regheader --o ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.mgz --no-save-reg
 mri_vol2vol --mov ${FREESURFER_DIR}/mri/T1.mgz --targ ${FREESURFER_DIR}/mri/rawavg.mgz --regheader --o ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w.mgz --no-save-reg
 mri_label2vol --seg ${FREESURFER_DIR}/mri/wm.seg.mgz --temp ${FREESURFER_DIR}/mri/rawavg.mgz --o ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg.mgz --regheader ${FREESURFER_DIR}/mri/wm.seg.mgz
 
+echo "Converting MGZ to NIfTI format..."
 mri_convert -it mgz -ot nii ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.mgz ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz
 mri_convert -it mgz -ot nii ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w.mgz ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w.nii.gz
 mri_convert -it mgz -ot nii ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg.mgz ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg.nii.gz
 
 rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.mgz
 rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w.mgz
-# rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg.mgz
 
-# suggested change -p by Claude, after we are using a newer? version of fast/fsl?.
-
+echo "Segmenting white matter..."
 fast -p ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz
 
-fslmaths ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pve_2.nii.gz \
-         -thr 0.5 -bin \
-         ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg_bin.nii.gz
+# fslmaths step suggested by Claude, binarizes the wm_seg and is used in flirt bbr command.
+fslmaths ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pve_2.nii.gz -thr 0.5 -bin ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_wm_seg_bin.nii.gz
 
 rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pve_0.nii.gz
 rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pve_1.nii.gz
@@ -127,12 +126,13 @@ rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_mixeltype.nii.gz
 rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_pveseg.nii.gz
 rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain_seg.nii.gz
 
-
+echo "Registering DWI to structural space..."
 flirt -in ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0_brain.nii.gz \
 	-ref ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz \
 	-dof 6 \
 	-omat ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_fsl_initial.mat
 
+echo "Refining registration with BBR..."
 flirt -in ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0_brain.nii.gz \
 	-ref ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz \
 	-dof 6 \
@@ -142,29 +142,32 @@ flirt -in ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0_brain.nii.gz \
 	-omat ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_fsl_bbr.mat \
 	-schedule $FSLDIR/etc/flirtsch/bbr.sch
 
+echo "Converting transformation for MRtrix..."
 transformconvert ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_fsl_bbr.mat \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_mean_b0_brain.nii.gz \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz \
 	flirt_import ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_mrtrix_bbr.txt
 
-#old:  ${T1_DIR}/sub-${SUBJECT}_run-01_T1w.nii.gz \
+echo "Applying transformation to T1-weighted image..."
 mrtransform ${T1_DIR}/T1.mgz \
 	-linear ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_mrtrix_bbr.txt \
 	-inverse ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_coreg.mif
 
+echo "Applying transformation to 5TT image..."
 mrtransform ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt.mif \
 	-linear ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_mrtrix_bbr.txt \
 	-inverse ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt_coreg.mif
 
-rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w*.nii.gz
-
-# Create 5tt visualisations for QC
+echo "Creating 5TT visualization for quality control..."
 5tt2vis ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt.mif ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt_vis.mif
 5tt2vis ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt_coreg.mif ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_5tt_vis_coreg.mif
 
+echo "Estimating response functions..."
 dwi2response dhollander \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_DWI.mif \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_RF_WM.txt \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_RF_GM.txt \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_RF_CSF.txt \
 	-voxels ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_RF_voxels.mif
+
+echo "Processing complete."
