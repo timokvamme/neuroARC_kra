@@ -92,8 +92,8 @@ steps_to_run = {
     "clean": 0,
     "step_1": 0,
     "step_2": 0,
-    "step_3": 1,
-    "step_4": 0,
+    "step_3": 0,
+    "step_4": 1,
     "step_5_desikan": 0,
     "step_5_destrieux": 0
 }

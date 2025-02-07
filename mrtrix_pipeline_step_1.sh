@@ -73,7 +73,7 @@ echo "SCRATCH=$SCRATCH"
 
 
 
-echo "Script starting successfully for $SUBJECT."
+echo "Script step_1.sh starting successfully for $SUBJECT."
 
 echo "Creating output directory..."
 mkdir -p ${OUTPUT_DIR}
@@ -170,4 +170,4 @@ dwi2response dhollander \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_RF_CSF.txt \
 	-voxels ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_RF_voxels.mif
 
-echo "Processing complete."
+echo "Script step_1.sh finished succesfully for $SUBJECT."

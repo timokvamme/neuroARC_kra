@@ -4,7 +4,6 @@
 # modified by Timo Kvamme
 
 
-
 SCRIPT_DIR="/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra"
 
 csv_file="${SCRIPT_DIR}/krakow_id_correspondance_clean.csv"
@@ -36,14 +35,16 @@ LUT_FILE="${SCRIPT_DIR}/FreeSurferColorLUT.txt"
 #
 
 
-mkdir ${OUTPUT_DIR}
+echo "Creating output directory for subject ${SUBJECT}..."
 
+echo "Converting FreeSurfer labels to MRtrix format..."
 labelconvert \
     "${FREESURFER_DATA_DIR}/mri/${org_file}" \
     "${LUT_FILE}" \
     "${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes.mif" \
     -nthreads 0
 
+echo "Applying CostLabelSGMFix for anatomical corrections..."
 ${COSTLABELSGMFIX_DIR}/costlabelsgmfix \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes.mif \
 	/projects/MINDLAB2016_MR-SensCogFromNeural/scratch/rsDenoise/raw/sub-${SUBJECT}/anat/sub-${SUBJECT}_run-01_T1w.nii.gz \
@@ -52,15 +53,20 @@ ${COSTLABELSGMFIX_DIR}/costlabelsgmfix \
 	${TT5_DIR} \
 	-nthreads 0
 
+echo "Transforming corrected nodes to diffusion space..."
 mrtransform \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes_fixed.mif \
 	-linear ${MRTRIX3_DIR}/sub-${SUBJECT}_run-01_diff2struct_mrtrix_bbr.txt \
 	-inverse ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes_fixed_coreg.mif \
 	-nthreads 0
 
+echo "Generating structural connectome from tractography..."
 tck2connectome \
 	${MRTRIX3_DIR}/sub-${SUBJECT}_run-01_10M_prob.tck \
-	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes_fixed_coreg.mif ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_connectome.csv \
+	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes_fixed_coreg.mif \
+	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_connectome.csv \
 	-tck_weights_in ${MRTRIX3_DIR}/sub-${SUBJECT}_run-01_10M_prob.sift \
 	-out_assignments ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_assignments.txt \
 	-nthreads 0
+
+echo "Processing step_4_destrieux.sh complete for subject ${SUBJECT}."

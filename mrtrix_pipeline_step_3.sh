@@ -73,10 +73,12 @@ echo "T1_DIR=$T1_DIR"
 echo "SCRATCH=$SCRATCH"
 
 
-echo "Script starting succesfully for $SUBJECT."
+echo "Script step_3.sh starting successfully for $SUBJECT."
 
+echo "Applying brain mask dilation..."
 maskfilter ${MASK_DIR}/brainmask.nii dilate ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_brainmask.mif
 
+echo "Computing fiber orientation distributions (FOD) using MSMT-CSD..."
 dwi2fod msmt_csd \
 	-nthreads 2 \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_DWI.mif \
@@ -87,7 +89,8 @@ dwi2fod msmt_csd \
 	$RESPONSE_DIR/group_average_response_csf.txt \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_CSF.mif \
 	-mask ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_brainmask.mif
-	
+
+echo "Performing multi-tissue normalization..."
 mtnormalise \
 	-nthreads 2 \
   	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_WM_FOD.mif ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_WM_FOD_norm.mif \
@@ -95,16 +98,19 @@ mtnormalise \
   	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_CSF.mif ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_CSF_norm.mif \
   	-mask ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_brainmask.mif
 
+echo "Removing intermediate FOD images..."
 rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_WM_FOD.mif
 rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_GM.mif
 rm ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_CSF.mif
-  	
+
+echo "Converting and concatenating FOD images into volume fraction maps..."
 mrconvert \
 	-coord 3 0 ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_WM_FOD_norm.mif - | \
 	mrcat ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_CSF_norm.mif \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_GM_norm.mif \
 	- ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_vf_norm.mif
 
+echo "Generating probabilistic tractography (10 million streamlines)..."
 tckgen ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_WM_FOD_norm.mif ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_10M_prob.tck \
   	-algorithm iFOD2 \
   	-seed_dynamic ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_WM_FOD_norm.mif \
@@ -117,5 +123,8 @@ tckgen ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_WM_FOD_norm.mif ${OUTPUT_DIR}/sub-${S
   	-select 10M \
   	-nthreads 8 \
   	-cutoff 0.06
+
+echo "Processing step_3.sh completed for $SUBJECT."
+
 
 

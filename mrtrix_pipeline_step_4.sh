@@ -75,7 +75,9 @@ echo "T1_DIR=$T1_DIR"
 echo "SCRATCH=$SCRATCH"
 
 
-echo "Script starting succesfully for $SUBJECT."
+echo "Script step_4.sh starting succesfully for $SUBJECT."
+
+echo "Running SIFT2 on 10M_prob.tck"
 
 tcksift2 -act $OUTPUT_DIR/sub-${SUBJECT}_run-01_5tt.mif \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_10M_prob.tck \
@@ -83,3 +85,6 @@ tcksift2 -act $OUTPUT_DIR/sub-${SUBJECT}_run-01_5tt.mif \
   	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_10M_prob.sift_second_run \
   	-out_mu ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_10M_prob.mu \
   	-out_coeffs ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_10M_prob.coeff
+
+echo "Done running SIFT2 on 10M_prob.tck"
+echo "Done with step_4.sh for $SUBJECT"
