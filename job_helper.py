@@ -167,10 +167,10 @@ def process_subjects_in_batches(step_name, subjects, root_dir, batch_size,script
 
             # Define log paths for the subject
             log_out_template = f"/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/logs/job_{subject_id}.out"
-            log_err_template = f"/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/logs/job_{subject_id}.err"
+
 
             # Submit job
-            job_id = submit_job(subject_id, log_out_template, log_err_template, script_path, root_dir,
+            job_id = submit_job(subject_id, log_out_template, log_out_template, script_path, root_dir,
                                 email="")
 
             if job_id:

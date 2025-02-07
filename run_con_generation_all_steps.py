@@ -126,8 +126,7 @@ for step in steps_to_run.keys():
 print("All pipeline steps completed successfully.")
 
 
-#
-#
+
 # import numpy as np
 # from nilearn import image
 # nifti_file = "/projects/2022_MR-SensCogGlobal/scratch/results/mrtrix3/sub-0004/sub-0004_run-01_mean_b0_brain.nii.gz"
