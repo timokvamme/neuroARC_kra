@@ -98,7 +98,7 @@ steps_to_run = {
     "step_5_destrieux": 0
 }
 
-# Paths to script files
+# Paths to script files #
 script_paths = {
     #"step_1": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_1_test_fast_flirt.sh",
     "step_1": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_1.sh",
