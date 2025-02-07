@@ -1,29 +1,63 @@
-# Copyright Claude Bajada
-# claude.bajada@um.edu.mt
-# modified by CHEN Hao
-# modified by Timo Kvamme
+#!/bin/bash
+# NeurArchCon Diffusion Script
+
+echo "running mrtrix_pipeline_step_5_destrieux.sh"
+
+# Load environment setup
+source /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/setup_env.sh
+
+# stand in the folder
+# cd /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra
+# you might need to run:
+# chmod +x mrtrix_pipeline_step_5_destrieux.sh
+
+# and for the freesurfer
+# chmod -R u+r /projects/MINDLAB2016_MR-SensCogFromNeural/scratch/timo/krakow_rsfmri_raw/freesurfer/
+
+# ./mrtrix_pipeline_step_5_destrieux.sh 0002 /projects/2022_MR-SensCogGlobal/scratch
 
 
-SCRIPT_DIR="/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra"
+SUBJECT=$1  # e.g., 0002
+root_dir=$2  # e.g., /projects/2022_MR-SensCogGlobal/scratch
 
-csv_file="${SCRIPT_DIR}/krakow_id_correspondance_clean.csv"
+# Ensure both arguments are provided
+if [[ -z $SUBJECT || -z $root_dir ]]; then
+  echo "Usage: $0 <SUBJECT> <root_dir>"
+  exit 1
+fi
+
+
 # Lookup FREESURFER_SUBJECT
+SCRIPT_DIR="/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra"
+csv_file="${SCRIPT_DIR}/krakow_id_correspondance_clean.csv"
+
 FREESURFER_SUBJECT=$(awk -F',' -v subject="$SUBJECT" '
 NR > 1 && $2 ~ subject {
     gsub(/"/, "", $3);
     print $3;
 }' "$csv_file")
-# Error handling
+
 if [[ -z $FREESURFER_SUBJECT ]]; then
-  echo "Error: Could not find FREESURFER_SUBJECT (krakow_id) for SUBJECT=$SUBJECT in $csv_file"
+  echo "Error: Could not find FREESURFER_SUBJECT for SUBJECT=$SUBJECT in $csv_file"
   exit 1
 fi
+
+FREESURFER_SUBJECT=$(echo "$FREESURFER_SUBJECT" | tr -d '\r' | tr -d '[:space:]')
+
 echo "Processing SUBJECT=$SUBJECT with FREESURFER_SUBJECT=$FREESURFER_SUBJECT"
 
-FREESURFER_DIR=$root_dir/timo/krakow_rsfmri_raw/freesurfer/sub-${FREESURFER_SUBJECT}
+# Set FreeSurfer subject directory
+export SUBJECTS_DIR="/projects/MINDLAB2016_MR-SensCogFromNeural/scratch/timo/krakow_rsfmri_raw/freesurfer"
+FREESURFER_DIR="${SUBJECTS_DIR}/sub-${FREESURFER_SUBJECT}"
 
+# Verify if FreeSurfer directory exists
+if [[ ! -d $FREESURFER_DIR ]]; then
+  echo "Error: Freesurfer directory does not exist: $FREESURFER_DIR"
+  exit 1
+fi
+
+# Define subject-specific directories
 MRTRIX3_DIR=$root_dir/results/mrtrix3
-
 OUTPUT_DIR=$MRTRIX3_DIR/sub-${SUBJECT}
 CFIN_DIR=${root_dir}
 MASK_DIR="${CFIN_DIR}/maskskurtosis2024/${SUBJECT}/*/MR/KURTOSIS/NATSPACE"
@@ -31,26 +65,34 @@ RESPONSE_DIR=$MRTRIX3_DIR/average_response
 T1_DIR=$FREESURFER_DIR/mri
 SCRATCH=$MRTRIX3_DIR/5tt
 org_file=aparc.a2009s+aseg.mgz # Destrieux atlas
-LUT_FILE="${SCRIPT_DIR}/FreeSurferColorLUT.txt"
-#
+LUT_FILE="/FreeSurferColorLUT.txt"
+LUT_CORRECTED="${OUTPUT_DIR}/sub-${SUBJECT}_FreeSurferColorLUT_corrected.txt"
+
+# Print paths for verification
+echo "Directories setup:"
+echo "OUTPUT_DIR=$OUTPUT_DIR"
+echo "MASK_DIR=$MASK_DIR"
+echo "T1_DIR=$T1_DIR"
+echo "SCRATCH=$SCRATCH"
 
 
-echo "Creating output directory for subject ${SUBJECT}..."
+echo "Script step_5_destrieux.sh starting succesfully for $SUBJECT."
+
 
 echo "Converting FreeSurfer labels to MRtrix format..."
 labelconvert \
-    "${FREESURFER_DATA_DIR}/mri/${org_file}" \
-    "${LUT_FILE}" \
-    "${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes.mif" \
-    -nthreads 0
+    "${FREESURFER_DIR}/mri/${org_file}" \
+     ${SCRIPT_DIR}/FreeSurferColorLUT.txt \
+     ${SCRIPT_DIR}/fs_default.txt ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes.mif \
+     -nthreads 0
 
 echo "Applying CostLabelSGMFix for anatomical corrections..."
 ${COSTLABELSGMFIX_DIR}/costlabelsgmfix \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes.mif \
-	/projects/MINDLAB2016_MR-SensCogFromNeural/scratch/rsDenoise/raw/sub-${SUBJECT}/anat/sub-${SUBJECT}_run-01_T1w.nii.gz \
-	${LUT_DIR}/${lut_file} \
-	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes_fixed.mif -premasked \
-	${TT5_DIR} \
+	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz \
+	${SCRIPT_DIR}/fs_default.txt \
+	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes_fixed.mif \
+	-premasked ${SCRATCH} \
 	-nthreads 0
 
 echo "Transforming corrected nodes to diffusion space..."
@@ -69,4 +111,4 @@ tck2connectome \
 	-out_assignments ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_assignments.txt \
 	-nthreads 0
 
-echo "Processing step_4_destrieux.sh complete for subject ${SUBJECT}."
+echo "Script step_5_destrieux.sh completed succesfully for $SUBJECT."

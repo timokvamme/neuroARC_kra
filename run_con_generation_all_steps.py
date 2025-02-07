@@ -81,7 +81,7 @@ os.chdir("/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra")
 all_subjects = np.array(pd.read_csv("krakow_id_correspondance_clean.csv", dtype=str)["storm_db_id"]) # check lookup_id_krakow.R
 
 all_subjects = all_subjects[0:10]  # Limit to first 20 subjects for testing
-#all_subjects = ["0003","0004"]
+all_subjects = ["0002"]
 
 # Define parameters
 batch_size = 10
@@ -93,9 +93,9 @@ steps_to_run = {
     "step_1": 0,
     "step_2": 0,
     "step_3": 0,
-    "step_4": 1,
+    "step_4": 0,
     "step_5_desikan": 0,
-    "step_5_destrieux": 0
+    "step_5_destrieux": 1
 }
 
 # Paths to script files #
@@ -132,18 +132,3 @@ for step in steps_to_run.keys():
 
 print("All pipeline steps completed successfully.")
 
-
-
-# import numpy as np
-# from nilearn import image
-# nifti_file = "/projects/2022_MR-SensCogGlobal/scratch/results/mrtrix3/sub-0004/sub-0004_run-01_mean_b0_brain.nii.gz"
-# img = image.load_img(nifti_file)
-#
-# # Convert to NumPy array
-# data = img.get_fdata()
-#
-# # Check for NaN values
-# num_nans = np.isnan(data).sum()
-# if num_nans > 0:print(f"❌ Found {num_nans} NaN values in the image data!")
-# else:print("✅ No NaN values found in the image.")
-#

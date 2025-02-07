@@ -48,5 +48,5 @@ If you encounter issues, check the following:
 - Input data formats meet the expected specifications.
 - System resources (memory, CPU) are sufficient for processing.
 
-For further assistance, contact claude.bajada@um.edu.mt (steps 1-5) or Hao Chen (step 6)
+For further assistance, contact claude.bajada@um.edu.mt & timokvamme@gmail.com (steps 1-5) or Hao Chen (step 6) 
 
