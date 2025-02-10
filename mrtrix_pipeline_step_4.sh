@@ -82,7 +82,7 @@ echo "Running SIFT2 on 10M_prob.tck"
 tcksift2 -act $OUTPUT_DIR/sub-${SUBJECT}_run-01_5tt.mif \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_10M_prob.tck \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_WM_FOD_norm.mif \
-  	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_10M_prob.sift_second_run \
+  	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_10M_prob.sift \
   	-out_mu ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_10M_prob.mu \
   	-out_coeffs ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_10M_prob.coeff
 

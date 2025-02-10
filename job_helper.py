@@ -198,7 +198,7 @@ def process_subjects_in_batches(step_name, subjects, root_dir, batch_size,script
 
 
             # Define err paths for the subject
-            log_err_template = f"/{logs_dir}/sub_{subject_id}.err"
+            log_err_template = f"/{logs_dir}/sub_{subject_id}_{step_name}.err"
 
 
             # Submit job

@@ -81,7 +81,7 @@ os.chdir("/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra")
 all_subjects = np.array(pd.read_csv("krakow_id_correspondance_clean.csv", dtype=str)["storm_db_id"]) # check lookup_id_krakow.R
 
 all_subjects = all_subjects[0:10]  # Limit to first 20 subjects for testing
-all_subjects = ["0002"]
+#all_subjects = ["0002"]
 
 # Define parameters
 batch_size = 10
@@ -90,12 +90,12 @@ check_interval = 60  # Time in seconds to wait between job status checks
 # Configuration for steps to run
 steps_to_run = {
     "clean": 0,
-    "step_1": 0,
-    "step_2": 0,
-    "step_3": 0,
-    "step_4": 0,
+    "step_1": 1,
+    "step_2": 1,
+    "step_3": 1,
+    "step_4": 1,
     "step_5_desikan": 0,
-    "step_5_destrieux": 1
+    "step_5_destrieux": 0
 }
 
 # Paths to script files #

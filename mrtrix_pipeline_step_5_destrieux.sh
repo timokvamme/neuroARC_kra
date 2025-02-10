@@ -68,6 +68,7 @@ SCRATCH=$MRTRIX3_DIR/5tt
 org_file=aparc.a2009s+aseg.mgz # Destrieux atlas
 LUT_FILE="/FreeSurferColorLUT.txt"
 LUT_CORRECTED="${OUTPUT_DIR}/sub-${SUBJECT}_FreeSurferColorLUT_corrected.txt"
+TT5_DIR=$MRTRIX3_DIR/5tt/sub-${SUBJECT}
 
 # Print paths for verification
 echo "Directories setup:"
@@ -84,16 +85,16 @@ echo "Converting FreeSurfer labels to MRtrix format..."
 labelconvert \
     "${FREESURFER_DIR}/mri/${org_file}" \
      ${SCRIPT_DIR}/FreeSurferColorLUT.txt \
-     ${SCRIPT_DIR}/fs_default.txt ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes.mif \
-     -nthreads 0
+     ${SCRIPT_DIR}/FreeSurferColorLUT.txt ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes.mif \
+     -nthreads 0 -force
 
 echo "Applying CostLabelSGMFix for anatomical corrections..."
 ${SCRIPT_DIR}/costlabelsgmfix/costlabelsgmfix \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes.mif \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz \
-	${SCRIPT_DIR}/fs_default.txt \
-	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes_fixed.mif \
-	-premasked ${SCRATCH} \
+	${SCRIPT_DIR}/FreeSurferColorLUT.txt \
+	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes_fixed.mif -premasked \
+	${TT5_DIR} \
 	-nthreads 0
 
 echo "Transforming corrected nodes to diffusion space..."
