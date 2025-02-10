@@ -89,7 +89,7 @@ check_interval = 60  # Time in seconds to wait between job status checks
 
 # Configuration for steps to run
 steps_to_run = {
-    "clean": 0,
+    "clean": 1,
     "step_1": 1,
     "step_2": 1,
     "step_3": 1,
@@ -125,10 +125,14 @@ for step in steps_to_run.keys():
             process_single_subject(step, all_subjects[0], root_dir, script_paths, logs_dir, check_interval)
         else:
             print(f"Starting {step} for all subjects...")
-            process_subjects_in_batches(step,all_subjects, root_dir, batch_size,script_paths,logs_dir,check_interval)
+            process_subjects_in_batches(step,all_subjects, root_dir, batch_size,script_paths,logs_dir,check_interval,email="timo@cfin.au.dk")
             print(f"Completed {step} for all subjects.")
 
 
-
 print("All pipeline steps completed successfully.")
+
+
+
+
+
 

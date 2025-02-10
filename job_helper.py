@@ -15,7 +15,7 @@ def submit_job(subject_id, log_out_template, log_err_template, script_path, scra
     Optionally sends an email notification upon job completion if an email is provided.
     """
     script_path_last_9 = script_path[-9:]
-    job_name = f"job_{subject_id}_{script_path_last_9}".format(subject_id=subject_id,script_path_last_9=script_path_last_9)
+    job_name = f"j_{subject_id}_{script_path_last_9}".format(subject_id=subject_id,script_path_last_9=script_path_last_9)
     log_out = log_out_template.format(subject_id=subject_id)
     log_err = log_err_template.format(subject_id=subject_id)
 
@@ -23,7 +23,7 @@ def submit_job(subject_id, log_out_template, log_err_template, script_path, scra
 
     submit_command = [
         qsub_path,
-        "-q", "all.q",
+        "-q", "long.q",
         "-o", log_out,
         "-e", log_err,
         "-N", job_name,
@@ -186,7 +186,7 @@ def process_single_subject(step_name, subject_id, root_dir, script_paths, logs_d
 
 
 # Function to process subjects in batches
-def process_subjects_in_batches(step_name, subjects, root_dir, batch_size,script_paths,logs_dir,check_interval):
+def process_subjects_in_batches(step_name, subjects, root_dir, batch_size,script_paths,logs_dir,check_interval,email=""):
     """Submits jobs in batches and waits for completion."""
     script_path = script_paths[step_name]
     job_ids = []
@@ -203,7 +203,7 @@ def process_subjects_in_batches(step_name, subjects, root_dir, batch_size,script
 
             # Submit job
             job_id = submit_job(subject_id, log_err_template, log_err_template, script_path, root_dir,
-                                email="")
+                                email=email)
 
             if job_id:
                 job_ids.append(job_id)
