@@ -1,4 +1,4 @@
-#!/bin/bash
+
 # NeurArchCon Diffusion Script
 
 echo "running mrtrix_pipeline_step_5_destrieux.sh"

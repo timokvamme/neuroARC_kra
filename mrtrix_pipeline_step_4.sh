@@ -1,4 +1,3 @@
-#!/bin/bash
 
 # NeurArchCon Diffusion Script
 

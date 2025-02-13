@@ -1,4 +1,3 @@
-#!/bin/bash
 
 echo "running mrtrix_pipeline_step_1.sh"
 
