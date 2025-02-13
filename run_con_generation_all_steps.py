@@ -65,7 +65,6 @@
 """
 
 
-
 from job_helper import *
 
 # Set environment variables for Grid Engine
@@ -95,7 +94,7 @@ steps_to_run = {
     "step_3": 1,
     "step_4": 1,
     "step_5_desikan": 0,
-    "step_5_destrieux": 0
+    "step_5_destrieux": 1
 }
 
 # Paths to script files #

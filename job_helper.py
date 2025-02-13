@@ -116,37 +116,51 @@ def wait_for_job_completion(job_id, check_interval=10):
 
 def cleanup_subject(subject_id, results_dir, logs_dir):
     """
-    Cleans up the subject's data by deleting the subject folder and log files.
+    Cleans up the subject's data by deleting:
+    - The subject folder and all its contents.
+    - Any log files that contain the subject ID.
 
     Parameters:
         subject_id (str): Subject ID (e.g., "0002")
         results_dir (str): Path to the results directory (e.g., "/projects/2022_MR-SensCogGlobal/scratch/results/mrtrix3")
         logs_dir (str): Path to the logs directory (e.g., "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/logs")
     """
+
+    # Define the subject folder path
     subject_folder = os.path.join(results_dir, f"sub-{subject_id}")
-    log_out = os.path.join(logs_dir, f"job_{subject_id}.out")
-    log_err = os.path.join(logs_dir, f"job_{subject_id}.err")
+
+    # Define the 5tt directory (inside results_dir)
+    five_tt_folder = os.path.join(results_dir, "5tt", f"sub-{subject_id}")
 
     # Delete the subject folder
     if os.path.exists(subject_folder):
         try:
             shutil.rmtree(subject_folder)
-            print(f"Deleted folder: {subject_folder}")
+            print(f"Deleted subject folder: {subject_folder}")
         except Exception as e:
             print(f"Error deleting {subject_folder}: {e}")
     else:
         print(f"Subject folder does not exist: {subject_folder}")
 
-    # Delete the log files
-    for log_file in [log_out, log_err]:
-        if os.path.exists(log_file):
-            try:
-                os.remove(log_file)
-                print(f"Deleted log file: {log_file}")
-            except Exception as e:
-                print(f"Error deleting {log_file}: {e}")
-        else:
-            print(f"Log file does not exist: {log_file}")
+    # Delete the 5tt folder if it exists
+    if os.path.exists(five_tt_folder):
+        try:
+            shutil.rmtree(five_tt_folder)
+            print(f"Deleted 5tt folder: {five_tt_folder}")
+        except Exception as e:
+            print(f"Error deleting {five_tt_folder}: {e}")
+    else:
+        print(f"5tt folder does not exist: {five_tt_folder}")
+
+    # Delete all log files containing the subject ID in filename
+    try:
+        log_files = [f for f in os.listdir(logs_dir) if subject_id in f]
+        for log_file in log_files:
+            log_path = os.path.join(logs_dir, log_file)
+            os.remove(log_path)
+            print(f"Deleted log file: {log_path}")
+    except Exception as e:
+        print(f"Error deleting logs: {e}")
 
     print(f"Cleanup completed for subject {subject_id}.")
 
