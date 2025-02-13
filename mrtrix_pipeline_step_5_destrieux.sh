@@ -80,19 +80,19 @@ echo "SCRATCH=$SCRATCH"
 
 echo "Script step_5_destrieux.sh starting succesfully for $SUBJECT."
 
-
+#
 echo "Converting FreeSurfer labels to MRtrix format..."
 labelconvert \
     "${FREESURFER_DIR}/mri/${org_file}" \
      ${SCRIPT_DIR}/FreeSurferColorLUT.txt \
-     ${SCRIPT_DIR}/FreeSurferColorLUT.txt ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes.mif \
+     ${SCRIPT_DIR}/fs_default.txt ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes.mif \
      -nthreads 0 -force
 
 echo "Applying CostLabelSGMFix for anatomical corrections..."
 ${SCRIPT_DIR}/costlabelsgmfix/costlabelsgmfix \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes.mif \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz \
-	${SCRIPT_DIR}/FreeSurferColorLUT.txt \
+	${SCRIPT_DIR}/fs_default.txt \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes_fixed.mif -premasked \
 	${TT5_DIR} \
 	-nthreads 0
@@ -102,7 +102,7 @@ mrtransform \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes_fixed.mif \
 	-linear ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_diff2struct_mrtrix_bbr.txt \
 	-inverse ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes_fixed_coreg.mif \
-	-nthreads 0
+	-nthreads 0 -force
 
 echo "Generating structural connectome from tractography..."
 tck2connectome \
@@ -111,6 +111,6 @@ tck2connectome \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_connectome.csv \
 	-tck_weights_in ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_10M_prob.sift \
 	-out_assignments ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_assignments.txt \
-	-nthreads 0
+	-nthreads 0 -force
 
 echo "Script step_5_destrieux.sh completed succesfully for $SUBJECT."
