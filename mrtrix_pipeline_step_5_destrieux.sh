@@ -17,7 +17,6 @@ source /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/setup_env.sh
 
 # ./mrtrix_pipeline_step_5_destrieux.sh 0002 /projects/2022_MR-SensCogGlobal/scratch
 
-
 SUBJECT=$1  # e.g., 0002
 root_dir=$2  # e.g., /projects/2022_MR-SensCogGlobal/scratch
 
@@ -66,8 +65,6 @@ RESPONSE_DIR=$MRTRIX3_DIR/average_response
 T1_DIR=$FREESURFER_DIR/mri
 SCRATCH=$MRTRIX3_DIR/5tt
 org_file=aparc.a2009s+aseg.mgz # Destrieux atlas
-LUT_FILE="/FreeSurferColorLUT.txt"
-LUT_CORRECTED="${OUTPUT_DIR}/sub-${SUBJECT}_FreeSurferColorLUT_corrected.txt"
 TT5_DIR=$MRTRIX3_DIR/5tt/sub-${SUBJECT}
 
 # Print paths for verification
@@ -85,17 +82,17 @@ echo "Converting FreeSurfer labels to MRtrix format..."
 labelconvert \
     "${FREESURFER_DIR}/mri/${org_file}" \
      ${SCRIPT_DIR}/FreeSurferColorLUT.txt \
-     ${SCRIPT_DIR}/fs_default.txt ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes.mif \
+     ${SCRIPT_DIR}/fs_a2009s.txt ${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes.mif \
      -nthreads 0 -force
 
 echo "Applying CostLabelSGMFix for anatomical corrections..."
 ${SCRIPT_DIR}/costlabelsgmfix/costlabelsgmfix \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes.mif \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_T1w_brain.nii.gz \
-	${SCRIPT_DIR}/fs_default.txt \
+	${SCRIPT_DIR}/fs_a2009s.txt \
 	${OUTPUT_DIR}/sub-${SUBJECT}_run-01_nodes_fixed.mif -premasked \
 	${TT5_DIR} \
-	-nthreads 0
+	-nthreads 0 -force
 
 echo "Transforming corrected nodes to diffusion space..."
 mrtransform \
