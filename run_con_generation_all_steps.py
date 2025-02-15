@@ -81,6 +81,12 @@
 # Look at `run_job.py` or `job_helper.py` for a simplified version of the workflow.
 
 # i found that removing #!/bin/bash from the step.sh was required for python here to work
+
+# to run this script:
+    conda activate mrtrix
+    python run_con_generation_all_steps.py
+
+
 """
 
 
@@ -98,14 +104,14 @@ root_dir = "/projects/2022_MR-SensCogGlobal/scratch"
 os.chdir("/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra")
 all_subjects = np.array(pd.read_csv("krakow_id_correspondance_clean.csv", dtype=str)["storm_db_id"]) # check lookup_id_krakow.R
 
-all_subjects = all_subjects[10:50]  # Limit to first 20 subjects for testing
+all_subjects = all_subjects[50:100]  # Limit to first 20 subjects for testing
 #all_subjects = ["0002"]
 
 # Define parameters
 batch_size = 10
 check_interval = 60  # Time in seconds to wait between job status checks
 
-# Configuration for steps to run
+# Configuration for steps to run #
 steps_to_run = {
     "clean": 1,
     "step_1": 1,

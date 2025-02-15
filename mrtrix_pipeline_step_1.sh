@@ -15,6 +15,9 @@ source /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/setup_env.sh
 # ./mrtrix_pipeline_step_1.sh 0002 /projects/2022_MR-SensCogGlobal/scratch
 
 
+# looking at images:
+#  cd /projects/2022_MR-SensCogGlobal/scratch/results
+
 SUBJECT=$1  # e.g., 0002
 root_dir=$2  # e.g., /projects/2022_MR-SensCogGlobal/scratch
 
