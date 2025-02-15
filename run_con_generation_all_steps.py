@@ -84,6 +84,7 @@
 
 # to run this script:
     conda activate mrtrix
+    cd /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra
     python run_con_generation_all_steps.py
 
 
@@ -104,7 +105,7 @@ root_dir = "/projects/2022_MR-SensCogGlobal/scratch"
 os.chdir("/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra")
 all_subjects = np.array(pd.read_csv("krakow_id_correspondance_clean.csv", dtype=str)["storm_db_id"]) # check lookup_id_krakow.R
 
-all_subjects = all_subjects[50:100]  # Limit to first 20 subjects for testing
+all_subjects = all_subjects[100:150]  # Limit to first 20 subjects for testing
 #all_subjects = ["0002"]
 
 # Define parameters
@@ -132,7 +133,6 @@ script_paths = {
     "step_5_desikan": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_5_desikan.sh",
     "step_5_destrieux": "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_5_destrieux.sh"
 }
-#
 
 # Run pipeline steps sequentially
 

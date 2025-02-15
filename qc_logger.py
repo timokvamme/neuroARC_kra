@@ -1,46 +1,51 @@
-import nibabel as nib
-import numpy as np
 import os
-import matplotlib.pyplot as plt
-import imageio
-from nilearn.plotting import plot_anat
+import pandas as pd
+import numpy as np
 
 # Define paths
-subject_id = "0051"
-root_dir = "/projects/2022_MR-SensCogGlobal/scratch/results/mrtrix3"
-log_dir = "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/qc_logs"
-os.makedirs(log_dir, exist_ok=True)
+logs_dir = "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/logs"
+connectome_dir = "/projects/2022_MR-SensCogGlobal/scratch/results/mrtrix3"
+subject_list_path = "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/krakow_id_correspondance_clean.csv"
+qc_logs_folder =  "/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/qc_logs"
 
-# Define image paths
-img1_path = os.path.join(root_dir, f"sub-{subject_id}", "sub-0051_run-01_T1w_brain.nii.gz")
-img2_path = os.path.join(root_dir, f"sub-{subject_id}", "sub-0051_run-01_mean_b0_brain.nii.gz")
-gif_file = os.path.join(log_dir, f"qc_overlap_sub-{subject_id}.gif")
 
-# Load images
-img1 = nib.load(img1_path)
-img2 = nib.load(img2_path)
+# Load subject IDs
+all_subjects = np.array(pd.read_csv(subject_list_path, dtype=str)["storm_db_id"])
 
-# Get data arrays
-data1 = img1.get_fdata()
-data2 = img2.get_fdata()
+# Initialize DataFrame
+qc_results = pd.DataFrame(index=all_subjects, columns=[
+    "node_streamline_assigned_err", "logfile_found", "con_matrix_found", "num_NA", "num_zeros"
+])
 
-# Ensure both images have the same shape
-if data1.shape != data2.shape:
-    raise ValueError("Image dimensions do not match! Consider resampling.")
+for subject in all_subjects:
+    log_file_path = os.path.join(logs_dir, f"sub_{subject}_step_5_destrieux.err")
+    connectome_file_path = os.path.join(connectome_dir, f"sub-{subject}", f"sub-{subject}_run-01_connectome.csv")
 
-# Generate GIF frames
-frames = []
-slices = np.linspace(10, data1.shape[2] - 10, 20).astype(int)
-for z in slices:
-    fig, ax = plt.subplots(figsize=(6, 6))
-    plot_anat(img1_path, cut_coords=[0, 0, z], display_mode='ortho', annotate=False, axes=ax)
-    plot_anat(img2_path, cut_coords=[0, 0, z], display_mode='ortho', alpha=0.5, cmap='Reds', annotate=False, axes=ax)
-    fig.canvas.draw()
-    frame = np.array(fig.canvas.renderer.buffer_rgba())
-    frames.append(frame)
-    plt.close(fig)
+    # Check for step 5 log file
+    try:
+        with open(log_file_path, 'r') as log_file:
+            log_content = log_file.read()
+            if "tck2connectome: [WARNING] The following nodes do not have any streamlines assigned:" in log_content:
+                qc_results.loc[subject, "node_streamline_assigned_err"] = True
+            else:
+                qc_results.loc[subject, "node_streamline_assigned_err"] = False
+        qc_results.loc[subject, "logfile_found"] = True
+    except FileNotFoundError:
+        qc_results.loc[subject, "node_streamline_assigned_err"] = "NA"
+        qc_results.loc[subject, "logfile_found"] = False
 
-# Save as GIF
-imageio.mimsave(gif_file, frames, duration=0.3)
+    # Check for connectome file and count NA/zeros
+    try:
+        con_matrix = pd.read_csv(connectome_file_path, header=None)
+        qc_results.loc[subject, "num_NA"] = con_matrix.isna().sum().sum()
+        qc_results.loc[subject, "num_zeros"] = (con_matrix == 0).sum().sum()
+        qc_results.loc[subject, "con_matrix_found"] = True
+    except FileNotFoundError:
+        qc_results.loc[subject, "num_NA"] = "NA"
+        qc_results.loc[subject, "num_zeros"] = "NA"
+        qc_results.loc[subject, "con_matrix_found"] = False
 
-print(f"GIF saved to {gif_file}")
+# Save QC results
+qc_results.to_csv(qc_logs_folder + "/qc_summary.csv")
+
+
