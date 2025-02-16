@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# if you change this file you need to run sed -i 's/\r$//' /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/setup_env.sh
+# because of the windows line endings
+
 # Load necessary environment
 source ~/.bashrc
 source /users/timo/anaconda3/etc/profile.d/conda.sh
