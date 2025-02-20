@@ -87,6 +87,8 @@
     cd /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra
     python run_con_generation_all_steps.py
 
+    for some reason mrtrix strating given isues and i trid using my_fsl instead for running this when i test it, to get a console to python
+    oddly enough mrtrix still worked when i submitted the job.
 
 """
 
@@ -105,10 +107,10 @@ root_dir = "/projects/2022_MR-SensCogGlobal/scratch"
 os.chdir("/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra")
 all_subjects = np.array(pd.read_csv("krakow_id_correspondance_clean.csv", dtype=str)["storm_db_id"]) # check lookup_id_krakow.R
 
-all_subjects = all_subjects[200:250]  # Limit to first 20 subjects for testing  # 50 subjects take about a day. #
+all_subjects = all_subjects[150:200]  # Limit to first 20 subjects for testing  # 50 subjects take about a day. #
 #all_subjects = ["0002"]
 
-# Define parameters
+# Define parameters #
 batch_size = 10
 check_interval = 60  # Time in seconds to wait between job status checks
 

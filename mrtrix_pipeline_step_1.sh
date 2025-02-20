@@ -4,6 +4,11 @@ echo "running mrtrix_pipeline_step_1.sh"
 # Load environment setup
 source /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/setup_env.sh # if you chance this file you need to run
 # sed -i 's/\r$//' /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/setup_env.sh
+# sed -i 's/\r$//' /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_1.sh
+# sed -i 's/\r$//' /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_2.sh
+# sed -i 's/\r$//' /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_3.sh
+# sed -i 's/\r$//' /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_4.sh
+# sed -i 's/\r$//' /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_5_destrieux.sh
 
 
 # stand in the folder
