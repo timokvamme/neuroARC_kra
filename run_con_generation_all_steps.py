@@ -90,6 +90,16 @@
     for some reason mrtrix strating given isues and i trid using my_fsl instead for running this when i test it, to get a console to python
     oddly enough mrtrix still worked when i submitted the job.
 
+# run this first in linux if you are in doubt.
+
+# sed -i 's/\r$//' /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/setup_env.sh
+# sed -i 's/\r$//' /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_1.sh
+# sed -i 's/\r$//' /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_2.sh
+# sed -i 's/\r$//' /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_3.sh
+# sed -i 's/\r$//' /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_4.sh
+# sed -i 's/\r$//' /projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra/mrtrix_pipeline_step_5_destrieux.sh
+
+
 """
 
 
@@ -107,7 +117,7 @@ root_dir = "/projects/2022_MR-SensCogGlobal/scratch"
 os.chdir("/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra")
 all_subjects = np.array(pd.read_csv("krakow_id_correspondance_clean.csv", dtype=str)["storm_db_id"]) # check lookup_id_krakow.R
 
-all_subjects = all_subjects[150:200]  # Limit to first 20 subjects for testing  # 50 subjects take about a day. #
+all_subjects = all_subjects[200:250]  # Limit to first 20 subjects for testing  # 50 subjects take about a day. #
 #all_subjects = ["0002"]
 
 # Define parameters #
@@ -161,7 +171,7 @@ for step in steps_to_run.keys():
 
 
 print("All pipeline steps completed successfully.")
-
+#
 
 
 
