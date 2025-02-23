@@ -46,6 +46,6 @@ for subject in all_subjects:
         qc_results.loc[subject, "con_matrix_found"] = False
 
 # Save QC results
-qc_results.to_csv(qc_logs_folder + "/qc_summary.csv")
+qc_results.to_csv(qc_logs_folder + "/qc_summary_23_02_2025.csv")
 
 

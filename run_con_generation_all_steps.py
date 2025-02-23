@@ -118,7 +118,7 @@ os.chdir("/projects/2022_MR-SensCogGlobal/scripts/neuroARC_kra")
 all_subjects = np.array(pd.read_csv("krakow_id_correspondance_clean.csv", dtype=str)["storm_db_id"]) # check lookup_id_krakow.R
 
 all_subjects = all_subjects[200:250]  # Limit to first 20 subjects for testing  # 50 subjects take about a day. #
-#all_subjects = ["0002"]
+all_subjects = ["0076","0116","0129","0133","0152","0172","0231","0271","0292"]
 
 # Define parameters #
 batch_size = 10
