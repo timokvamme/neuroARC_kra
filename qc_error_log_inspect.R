@@ -27,6 +27,9 @@ ggplot(dfc, aes(x=num_zeros, fill=error_note)) +
   theme_minimal()
 
 
+#
+
+
 
 
 
