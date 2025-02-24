@@ -106,8 +106,13 @@ print("Files have been renamed, moved, and organized successfully.")
 
 
 # moved to MINDLAB2016_MR-SensCogFromNeural\scratch\timo\krakow_struct_mrtrix_results using python
-# import shutilx
+
+# import shutil, os
 # source = "/projects/2022_MR-SensCogGlobal/scratch/results/mrtrix3_final_connectome_destrieux"
 # destination = "/projects/MINDLAB2016_MR-SensCogFromNeural/scratch/timo/krakow_struct_mrtrix_results"
-
-
+#
+# # Ensure the destination exists or create it
+# os.makedirs(destination, exist_ok=True)
+#
+# # Copy the entire directory and its contents
+# shutil.copytree(source, destination, dirs_exist_ok=True)  # Allows overwriting existing files

@@ -49,3 +49,7 @@ for subject in all_subjects:
 qc_results.to_csv(qc_logs_folder + "/qc_summary_24_02_2025.csv")
 
 
+import shutil
+source = "/projects/2022_MR-SensCogGlobal/scratch/results/mrtrix3_final_connectome_destrieux"
+destination = "/projects/MINDLAB2016_MR-SensCogFromNeural/scratch/timo/krakow_struct_mrtrix_results"
+shutil.copytree(source, destination)
